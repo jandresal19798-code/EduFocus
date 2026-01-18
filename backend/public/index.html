@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduFocus - App Educativa</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+    }
+    .logo {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    .status {
+      background: rgba(255,255,255,0.2);
+      padding: 15px 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .status.online {
+      background: rgba(76, 175, 80, 0.3);
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .feature {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 12px;
+      transition: transform 0.3s;
+    }
+    .feature:hover {
+      transform: translateY(-5px);
+      background: rgba(255,255,255,0.2);
+    }
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    .feature h3 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+    .feature p {
+      font-size: 13px;
+      margin: 0;
+      opacity: 0.8;
+    }
+    .links {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .link {
+      background: white;
+      color: #667eea;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    .link:hover {
+      transform: scale(1.05);
+    }
+    .link.secondary {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">📚</div>
+    <h1>EduFocus</h1>
+    <p>Tu asistente de estudio inteligente. Aprende, organiza y destaca con tecnología educativa avanzada.</p>
+    
+    <div class="status online">
+      ✅ API funcionando correctamente
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🤖</div>
+        <h3>Tutor Inteligente</h3>
+        <p>Aprende con preguntas guía</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📅</div>
+        <h3>Planificador</h3>
+        <p>Organiza tus tareas</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⏱️</div>
+        <h3>Modo Focus</h3>
+        <p>Técnica Pomodoro</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📱</div>
+        <h3>App Móvil</h3>
+        <p>Estudia en cualquier lugar</p>
+      </div>
+    </div>
+
+    <div class="links">
+      <a href="/api/health" class="link">API Health</a>
+      <a href="https://github.com/jandresal19798-code/EduFocus" class="link secondary">GitHub</a>
+    </div>
+  </div>
+</body>
+</html>

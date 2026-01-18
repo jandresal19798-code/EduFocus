@@ -33,6 +33,11 @@ app.use(rateLimit({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+  res.sendFile('public/index.html', { root: '.' });
+});
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
