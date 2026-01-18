@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "EduFocus",
+    "slug": "edufocus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#5C6BC0"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.edufocus.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#5C6BC0"
+      },
+      "package": "com.edufocus.app"
+    },
+    "web": {
+      "favicon": false
+    },
+    "plugins": []
+  }
+}

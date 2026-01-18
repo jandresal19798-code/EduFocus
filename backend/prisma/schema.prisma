@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  passwordHash    String
+  role            String   @default("STUDENT")
+  birthDate       DateTime
+  parentalConsent Boolean  @default(false)
+  parentId        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  profile           StudentProfile?
+  children          StudentProfile[] @relation("ParentStudent")
+  tasks             Task[]
+  studySessions     StudySession[]
+  contentUploads    ContentUpload[]
+  tutorConversations TutorConversation[]
+}
+
+model StudentProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  ageGroup        String
+  displayName     String
+  avatarUrl       String?
+  preferences     String   @default("{}")
+  currentStreak   Int      @default(0)
+  totalXP         Int      @default(0)
+  level           Int      @default(1)
+  lastActiveAt    DateTime?
+  createdAt       DateTime @default(now())
+  
+  parent          User?    @relation("ParentStudent", fields: [parentId], references: [id])
+  parentId        String?
+  badges          Badge[]
+  projects        Project[]
+}
+
+model Badge {
+  id        String   @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+  badgeType String
+  earnedAt  DateTime @default(now())
+  
+  @@unique([studentId, badgeType])
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  title       String
+  subject     String
+  deadline    DateTime
+  priority    String   @default("MEDIUM")
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  tasks       Task[]
+}
+
+model Task {
+  id              String   @id @default(uuid())
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id])
+  studentId       String
+  student         User     @relation(fields: [studentId], references: [id])
+  title           String
+  description     String?
+  estimatedMinutes Int
+  dueDate         DateTime?
+  isCompleted     Boolean  @default(false)
+  completedAt     DateTime?
+  difficulty      Int      @default(3)
+  subject         String
+  createdAt       DateTime @default(now())
+  
+  subtasks        SubTask[]
+}
+
+model SubTask {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id])
+  title       String
+  isCompleted Boolean  @default(false)
+}
+
+model StudySession {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id])
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int?
+  subject     String
+  taskId      String?
+  isActive    Boolean  @default(false)
+}
+
+model ContentUpload {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id])
+  fileUrl     String
+  fileType    String
+  subject     String
+  processed   Boolean  @default(false)
+  summary     String?
+  createdAt   DateTime @default(now())
+}
+
+model TutorConversation {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id])
+  subject     String
+  topic       String
+  messages    TutorMessage[]
+  isResolved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model TutorMessage {
+  id            String   @id @default(uuid())
+  conversationId String
+  conversation  TutorConversation @relation(fields: [conversationId], references: [id])
+  role          String
+  content       String
+  context       String?
+  createdAt     DateTime @default(now())
+}
+
+model ProgressRecord {
+  id          String   @id @default(uuid())
+  studentId   String
+  subject     String
+  topic       String
+  masteryLevel Float
+  timeSpent   Int
+  attempts    Int
+  score       Float?
+  recordedAt  DateTime @default(now())
+}
