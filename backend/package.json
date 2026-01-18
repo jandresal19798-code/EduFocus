@@ -23,11 +23,11 @@
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
     "tesseract.js": "^5.0.4",
-    "ws": "^8.14.2"
+    "ws": "^8.14.2",
+    "@prisma/client": "5.22.0"
   },
   "devDependencies": {
-    "@prisma/client": "^5.22.0",
     "nodemon": "^3.0.2",
-    "prisma": "^5.22.0"
+    "prisma": "5.22.0"
   }
 }
