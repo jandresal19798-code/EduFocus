@@ -8,7 +8,12 @@ export class AppError extends Error {
 }
 
 export function errorHandler(err, req, res, next) {
-  console.error('Error:', err);
+  console.error('========== ERROR ==========');
+  console.error('Message:', err.message);
+  console.error('Code:', err.code);
+  console.error('Name:', err.name);
+  console.error('Stack:', err.stack);
+  console.error('============================');
 
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
@@ -26,11 +31,20 @@ export function errorHandler(err, req, res, next) {
 
   if (err.code === 'P2002') {
     return res.status(409).json({
-      error: 'El recurso ya existe'
+      error: 'El recurso ya existe',
+      hint: 'Este email ya está registrado. Usa otro email.'
+    });
+  }
+
+  if (err.code === 'P2025') {
+    return res.status(404).json({
+      error: 'Registro no encontrado'
     });
   }
 
   return res.status(500).json({
-    error: 'Error interno del servidor'
+    error: 'Error interno del servidor',
+    message: err.message,
+    type: err.name || 'Unknown'
   });
 }
