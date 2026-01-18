@@ -67,14 +67,32 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', authenticateToken, userRoutes);
-app.use('/api/tasks', authenticateToken, taskRoutes);
-app.use('/api/tutor', authenticateToken, tutorRoutes);
-app.use('/api/focus', authenticateToken, focusRoutes);
-app.use('/api/content', authenticateToken, contentRoutes);
-app.use('/api/progress', authenticateToken, progressRoutes);
-app.use('/api/parent', authenticateToken, parentRoutes);
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API funciona correctamente', version: '1.0.0' });
+});
+
+try {
+  app.use('/api/auth', authRoutes);
+  app.use('/api/users', authenticateToken, userRoutes);
+  app.use('/api/tasks', authenticateToken, taskRoutes);
+  app.use('/api/tutor', authenticateToken, tutorRoutes);
+  app.use('/api/focus', authenticateToken, focusRoutes);
+  app.use('/api/content', authenticateToken, contentRoutes);
+  app.use('/api/progress', authenticateToken, progressRoutes);
+  app.use('/api/parent', authenticateToken, parentRoutes);
+} catch (error) {
+  console.error('Error loading routes:', error);
+  app.use('/api', (req, res) => {
+    res.status(503).json({ 
+      error: 'Database not connected',
+      message: 'La base de datos no está conectada. Verifica DATABASE_URL.'
+    });
+  });
+}
 
 app.use(errorHandler);
 
