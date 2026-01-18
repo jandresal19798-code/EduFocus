@@ -1,0 +1,67 @@
+{
+  "name": "20260118120000_init",
+  "batchable": true,
+  "createdAt": "2026-01-18T12:00:00.000Z",
+  "migrationName": "init",
+  "steps": [
+    {
+      "kind": "CreateEnum",
+      "enum": "UserRole",
+      "values": ["STUDENT", "PARENT", "ADMIN"]
+    },
+    {
+      "kind": "CreateEnum",
+      "enum": "AgeGroup",
+      "values": ["CHILD", "TEENAGER"]
+    },
+    {
+      "kind": "CreateEnum",
+      "enum": "Priority",
+      "values": ["LOW", "MEDIUM", "HIGH", "URGENT"]
+    },
+    {
+      "kind": "CreateTable",
+      "name": "User"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "StudentProfile"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "Badge"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "Project"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "Task"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "SubTask"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "StudySession"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "ContentUpload"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "TutorConversation"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "TutorMessage"
+    },
+    {
+      "kind": "CreateTable",
+      "name": "ProgressRecord"
+    }
+  ]
+}
