@@ -23,8 +23,28 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws/tutor' });
 
 app.use(helmet());
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:8081',
+  'http://localhost:8082',
+  'http://localhost:8083',
+  'http://localhost:8084',
+  'http://localhost:8085',
+  'http://localhost:8086',
+  'http://localhost:8090',
+  'http://localhost:8095',
+  '.onrender.com'
+];
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8082', 'http://localhost:8083', 'http://localhost:8084', 'http://localhost:8085', 'http://localhost:8086', 'http://localhost:8090', 'http://localhost:8095'],
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.some(oa => origin.includes(oa) || oa.startsWith('.'))) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true
 }));
 app.use(rateLimit({
