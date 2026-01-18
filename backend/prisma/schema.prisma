@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,7 +11,7 @@ model User {
   id              String   @id @default(uuid())
   email           String   @unique
   passwordHash    String
-  role            String   @default("STUDENT")
+  role            UserRole @default(STUDENT)
   birthDate       DateTime
   parentalConsent Boolean  @default(false)
   parentId        String?
@@ -26,14 +26,20 @@ model User {
   tutorConversations TutorConversation[]
 }
 
+enum UserRole {
+  STUDENT
+  PARENT
+  ADMIN
+}
+
 model StudentProfile {
   id              String   @id @default(uuid())
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id])
-  ageGroup        String
+  ageGroup        AgeGroup
   displayName     String
   avatarUrl       String?
-  preferences     String   @default("{}")
+  preferences     Json     @default("{}")
   currentStreak   Int      @default(0)
   totalXP         Int      @default(0)
   level           Int      @default(1)
@@ -44,6 +50,11 @@ model StudentProfile {
   parentId        String?
   badges          Badge[]
   projects        Project[]
+}
+
+enum AgeGroup {
+  CHILD
+  TEENAGER
 }
 
 model Badge {
@@ -63,7 +74,7 @@ model Project {
   title       String
   subject     String
   deadline    DateTime
-  priority    String   @default("MEDIUM")
+  priority    Priority @default(MEDIUM)
   isCompleted Boolean  @default(false)
   createdAt   DateTime @default(now())
   
@@ -97,6 +108,13 @@ model SubTask {
   isCompleted Boolean  @default(false)
 }
 
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 model StudySession {
   id          String   @id @default(uuid())
   studentId   String
@@ -117,7 +135,7 @@ model ContentUpload {
   fileType    String
   subject     String
   processed   Boolean  @default(false)
-  summary     String?
+  summary     Json?
   createdAt   DateTime @default(now())
 }
 
@@ -138,7 +156,7 @@ model TutorMessage {
   conversation  TutorConversation @relation(fields: [conversationId], references: [id])
   role          String
   content       String
-  context       String?
+  context       Json?
   createdAt     DateTime @default(now())
 }
 
@@ -152,4 +170,6 @@ model ProgressRecord {
   attempts    Int
   score       Float?
   recordedAt  DateTime @default(now())
+  
+  @@index([studentId, subject, recordedAt])
 }
