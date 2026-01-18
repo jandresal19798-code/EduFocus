@@ -6,6 +6,16 @@ const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
+    // Check database connection
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
+
     const { status, subject, projectId } = req.query;
     
     const where = { studentId: req.user.id };
@@ -18,21 +28,35 @@ router.get('/', async (req, res, next) => {
       where,
       include: {
         project: { select: { id: true, title: true } },
-        subtasks: true,
-        _count: { select: { pomodoros: true } }
+        subtasks: true
       },
       orderBy: [{ isCompleted: 'asc' }, { dueDate: 'asc' }]
     });
 
     res.json({ tasks });
   } catch (error) {
+    console.error('Error in tasks GET:', error);
     next(error);
   }
 });
 
 router.post('/', async (req, res, next) => {
   try {
+    // Check database connection
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
+
     const { title, description, subject, estimatedMinutes, dueDate, difficulty, projectId, subtasks } = req.body;
+
+    if (!title || !subject) {
+      throw new AppError('Título y materia son requeridos', 400);
+    }
 
     const task = await prisma.task.create({
       data: {
@@ -53,14 +77,28 @@ router.post('/', async (req, res, next) => {
 
     res.status(201).json({ task });
   } catch (error) {
+    console.error('Error in tasks POST:', error);
     next(error);
   }
 });
 
 router.post('/generate-plan', async (req, res, next) => {
   try {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
+
     const { projectTitle, subject, deadline, totalEstimatedHours } = req.body;
     
+    if (!projectTitle || !deadline) {
+      throw new AppError('Título del proyecto y fecha límite son requeridos', 400);
+    }
+
     const deadlineDate = new Date(deadline);
     const now = new Date();
     const daysUntilDeadline = Math.ceil((deadlineDate - now) / (24 * 60 * 60 * 1000));
@@ -95,6 +133,7 @@ router.post('/generate-plan', async (req, res, next) => {
       suggestion: `Te recomiendo ${daysUntilDeadline > 7 ? '2-3' : '4-5'} sesiones de ${Math.round(dailyMinutes)} minutos diarias`
     });
   } catch (error) {
+    console.error('Error in generate-plan:', error);
     next(error);
   }
 });
@@ -135,6 +174,15 @@ function generateSubtasks(title, subject, dailyMinutes, days) {
 
 router.put('/:id', async (req, res, next) => {
   try {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
+
     const { id } = req.params;
     const { title, description, isCompleted, estimatedMinutes, dueDate } = req.body;
 
@@ -147,16 +195,6 @@ router.put('/:id', async (req, res, next) => {
     if (isCompleted !== undefined) {
       updateData.isCompleted = isCompleted;
       updateData.completedAt = isCompleted ? new Date() : null;
-      
-      if (isCompleted) {
-        await prisma.studentProfile.update({
-          where: { userId: req.user.id },
-          data: { 
-            totalXP: { increment: 10 },
-            currentStreak: { increment: 1 }
-          }
-        });
-      }
     }
 
     const task = await prisma.task.update({
@@ -167,17 +205,28 @@ router.put('/:id', async (req, res, next) => {
 
     res.json({ task });
   } catch (error) {
+    console.error('Error in tasks PUT:', error);
     next(error);
   }
 });
 
 router.delete('/:id', async (req, res, next) => {
   try {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
+
     await prisma.task.delete({
       where: { id: req.params.id, studentId: req.user.id }
     });
     res.json({ message: 'Tarea eliminada' });
   } catch (error) {
+    console.error('Error in tasks DELETE:', error);
     next(error);
   }
 });
