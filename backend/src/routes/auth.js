@@ -14,6 +14,17 @@ router.post('/register', async (req, res, next) => {
       throw new AppError('Email, contraseña y fecha de nacimiento son requeridos', 400);
     }
 
+    // Try to connect to database
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible. Verifica que DATABASE_URL esté configurada correctamente.',
+        hint: 'Asegúrate de que tu PostgreSQL en Render esté activo y la conexión sea correcta.'
+      });
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       throw new AppError('El email ya está registrado', 409);
@@ -90,6 +101,16 @@ router.post('/login', async (req, res, next) => {
       throw new AppError('Email y contraseña son requeridos', 400);
     }
 
+    // Try to connect to database
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
+
     const user = await prisma.user.findUnique({ 
       where: { email },
       include: { profile: true }
@@ -135,6 +156,15 @@ router.post('/refresh', async (req, res, next) => {
     const jwt = await import('jsonwebtoken');
     
     const decoded = jwt.default.verify(refreshToken, process.env.JWT_SECRET || 'edufocus-secret-key-change-in-production');
+    
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      return res.status(503).json({
+        error: 'Database unavailable',
+        message: 'La base de datos no está disponible.'
+      });
+    }
     
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     if (!user) {

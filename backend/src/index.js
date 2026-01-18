@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import dotenv from 'dotenv';
+import { connectDB, disconnectDB, default as prisma } from './config/database.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import taskRoutes from './routes/tasks.js';
@@ -67,39 +68,62 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected', timestamp: new Date().toISOString() });
+  } catch (error) {
+    res.json({ status: 'ok', database: 'disconnected', timestamp: new Date().toISOString() });
+  }
 });
 
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API funciona correctamente', version: '1.0.0' });
 });
 
-try {
-  app.use('/api/auth', authRoutes);
-  app.use('/api/users', authenticateToken, userRoutes);
-  app.use('/api/tasks', authenticateToken, taskRoutes);
-  app.use('/api/tutor', authenticateToken, tutorRoutes);
-  app.use('/api/focus', authenticateToken, focusRoutes);
-  app.use('/api/content', authenticateToken, contentRoutes);
-  app.use('/api/progress', authenticateToken, progressRoutes);
-  app.use('/api/parent', authenticateToken, parentRoutes);
-} catch (error) {
-  console.error('Error loading routes:', error);
-  app.use('/api', (req, res) => {
-    res.status(503).json({ 
-      error: 'Database not connected',
-      message: 'La base de datos no está conectada. Verifica DATABASE_URL.'
-    });
-  });
-}
+// API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', authenticateToken, userRoutes);
+app.use('/api/tasks', authenticateToken, taskRoutes);
+app.use('/api/tutor', authenticateToken, tutorRoutes);
+app.use('/api/focus', authenticateToken, focusRoutes);
+app.use('/api/content', authenticateToken, contentRoutes);
+app.use('/api/progress', authenticateToken, progressRoutes);
+app.use('/api/parent', authenticateToken, parentRoutes);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`🚀 EduFocus Backend ejecutándose en puerto ${PORT}`);
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Not Found',
+    message: `Ruta ${req.method} ${req.path} no encontrada`,
+    availableRoutes: ['/health', '/api/health', '/api/test', '/api/auth/login', '/api/auth/register']
+  });
 });
+
+const PORT = process.env.PORT || 4000;
+
+// Start server
+async function startServer() {
+  const dbConnected = await connectDB();
+  
+  if (!dbConnected) {
+    console.log('⚠️  Advertencia: Base de datos no conectada. La API funcionará en modo limitado.');
+    console.log('📝 Verifica que DATABASE_URL esté configurada correctamente en Environment Variables.');
+  }
+
+  server.listen(PORT, () => {
+    console.log(`🚀 EduFocus Backend ejecutándose en puerto ${PORT}`);
+    if (dbConnected) {
+      console.log(`✅ Base de datos: Conectada`);
+    } else {
+      console.log(`❌ Base de datos: Desconectada`);
+    }
+  });
+}
+
+startServer().catch(console.error);
 
 wss.on('connection', (ws, req) => {
   console.log('Nueva conexión WebSocket');
