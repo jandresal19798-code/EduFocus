@@ -81,6 +81,19 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API funciona correctamente', version: '1.0.0' });
 });
 
+// Direct test route for register
+app.post('/api/register-direct', async (req, res) => {
+  try {
+    const { email, password, birthDate, role } = req.body;
+    res.json({ 
+      received: { email, password, birthDate, role },
+      message: 'Datos recibidos correctamente'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
@@ -93,11 +106,20 @@ app.use('/api/parent', authenticateToken, parentRoutes);
 
 app.use(errorHandler);
 
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  next();
+});
+
 // 404 handler
 app.use((req, res) => {
+  console.log(`404 - Route not found: ${req.method} ${req.path}`);
   res.status(404).json({ 
     error: 'Not Found',
     message: `Ruta ${req.method} ${req.path} no encontrada`,
+    path: req.path,
+    method: req.method,
     availableRoutes: ['/health', '/api/health', '/api/test', '/api/auth/login', '/api/auth/register']
   });
 });
