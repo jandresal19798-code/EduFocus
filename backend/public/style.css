@@ -37,7 +37,7 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg-light);
   color: var(--text-light);
   min-height: 100vh;
@@ -561,12 +561,12 @@ body {
   font-size: 72px;
   font-weight: 700;
   text-align: center;
-  font-family: 'SF Mono', 'Monaco', monospace;
   background: linear-gradient(135deg, var(--primary), #8b5cf6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 20px 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .pomodoro-controls {
