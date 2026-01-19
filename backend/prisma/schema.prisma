@@ -95,6 +95,7 @@ model Task {
   completedAt     DateTime?
   difficulty      Int      @default(3)
   subject         String
+  topic           String?
   createdAt       DateTime @default(now())
   
   subtasks        SubTask[]
