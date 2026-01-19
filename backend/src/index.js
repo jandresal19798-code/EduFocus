@@ -95,20 +95,20 @@ app.get('/api/test', (req, res) => {
 // Seed educational tasks (admin only)
 app.post('/api/seed-tasks', async (req, res) => {
   try {
-    const { default: seedTasks } = await import('./services/seedTasks.js');
-    
-    // Check if user is admin (for security)
-    const user = await prisma.user.findFirst({
-      where: { role: 'ADMIN' }
-    });
-    
-    // Allow any authenticated user to seed for testing
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ error: 'No autorizado' });
     }
     
-    await seedTasks();
+    // Get the user from the token
+    const jwt = await import('jsonwebtoken');
+    const decoded = jwt.default.verify(authHeader.split(' ')[1], process.env.JWT_SECRET || 'edufocus-secret-key-change-in-production');
+    const userId = decoded.id;
+    
+    // Import and run seed with userId
+    const { default: seedTasks } = await import('./services/seedTasks.js');
+    await seedTasks(userId);
+    
     res.json({ message: 'Tareas educativas sembradas correctamente' });
   } catch (error) {
     console.error('Error en seed:', error);

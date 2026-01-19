@@ -1524,20 +1524,29 @@ const tasks = [
   }
 ];
 
-async function seedTasks() {
+async function seedTasks(userId = null) {
   console.log('🌱 Iniciando seed de tareas educativas...\n');
 
   try {
-    const user = await prisma.user.findFirst({
-      where: { role: 'STUDENT' }
-    });
+    let user;
+    if (userId) {
+      user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+    }
+    
+    if (!user) {
+      user = await prisma.user.findFirst({
+        where: { role: 'STUDENT' }
+      });
+    }
 
     if (!user) {
       console.log('❌ No hay usuarios registrados. Por favor regístrate primero.');
-      return;
+      return { error: 'No user found' };
     }
 
-    console.log(`✅ Usuario encontrado: ${user.email}\n`);
+    console.log(`✅ Usuario encontrado: ${user.email} (ID: ${user.id})`);
     console.log(`📚 Total de tareas a sembrar: ${tasks.length}\n`);
 
     let created = 0;
@@ -1586,11 +1595,10 @@ async function seedTasks() {
 
   } catch (error) {
     console.error('❌ Error durante el seed:', error);
+    return { error: error.message };
   } finally {
     await prisma.$disconnect();
   }
 }
-
-seedTasks();
 
 export default seedTasks;
