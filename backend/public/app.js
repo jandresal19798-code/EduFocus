@@ -328,7 +328,7 @@
             var isInPlan = todayPlan.find(function(p) { return p.id === t.id; });
             var isSelected = isInPlan ? ' selected' : '';
             
-            return '<div class="task-item' + isSelected + (t.isCompleted ? ' completed' : '") onclick="window.handleTaskClick(\'' + t.id + '\')">' +
+            return '<div class="task-item' + isSelected + (t.isCompleted ? ' completed' : '') + '" onclick="window.handleTaskClick(\'' + t.id + '\')">' +
                 '<input type="checkbox" ' + (t.isCompleted ? 'checked' : '') + ' onchange="event.stopPropagation();window.toggleTask(\'' + t.id + '\',' + (!t.isCompleted) + ')">' +
                 '<span>' + t.title + '</span>' +
                 '<span class="task-subject">' + t.subject + '</span>' +
