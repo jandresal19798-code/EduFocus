@@ -9,7 +9,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="card header">
             <div class="logo">🎓 EduFocus</div>
             <div id="userInfo" class="hidden user-info">
@@ -17,11 +16,10 @@
                 <span class="user-badge badge-xp">⭐ <span id="xpDisplay">0</span></span>
                 <span class="user-badge badge-level">📊 <span id="levelDisplay">Nivel 1</span></span>
                 <span id="userNameDisplay" style="color:#555;font-weight:500"></span>
-                <button onclick="logout()" style="background:none;border:none;cursor:pointer;font-size:20px">🚪</button>
+                <button id="logoutBtn" style="background:none;border:none;cursor:pointer;font-size:20px">🚪</button>
             </div>
         </div>
 
-        <!-- Auth Section -->
         <div id="authSection" class="card">
             <h2 style="text-align:center;margin-bottom:20px;font-size:24px">🔐 Inicia tu sesión</h2>
             <div class="auth-grid">
@@ -34,21 +32,19 @@
                         <option value="STUDENT">🎒 Estudiante</option>
                         <option value="PARENT">👨‍👩‍👧 Padre/Madre</option>
                     </select>
-                    <button onclick="register()" class="btn btn-primary">Crear cuenta</button>
+                    <button id="registerBtn" class="btn btn-primary">Crear cuenta</button>
                 </div>
                 <div>
                     <h3 style="margin-bottom:15px;color:#48bb78">🔑 Login</h3>
                     <input type="email" id="loginEmail" class="input" placeholder="Email">
                     <input type="password" id="loginPassword" class="input" placeholder="Contraseña">
-                    <button onclick="login()" class="btn btn-secondary">Entrar</button>
+                    <button id="loginBtn" class="btn btn-secondary">Entrar</button>
                 </div>
             </div>
             <div id="authResult" style="margin-top:15px;text-align:center;display:none"></div>
         </div>
 
-        <!-- Dashboard -->
         <div id="dashboard" class="hidden">
-            <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="level">1</div>
@@ -68,21 +64,18 @@
                 </div>
             </div>
 
-            <!-- Main Grid -->
             <div class="main-grid">
-                <!-- Tutor -->
                 <div class="card">
                     <h3 style="margin-bottom:15px">🤖 Tutor Inteligente</h3>
                     <div id="tutorChat" class="chat-box">
                         <p style="color:#888;text-align:center;padding:40px">💡 Pregúntame sobre cualquier tema:<br>Matemáticas, Historia, Ciencias...</p>
                     </div>
                     <div class="input-row">
-                        <input type="text" id="tutorInput" class="input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')sendTutorMessage()">
-                        <button onclick="sendTutorMessage()" class="btn btn-primary" style="width:auto;padding:12px 24px">Enviar</button>
+                        <input type="text" id="tutorInput" class="input" placeholder="Escribe tu pregunta...">
+                        <button id="tutorSendBtn" class="btn btn-primary" style="width:auto;padding:12px 24px">Enviar</button>
                     </div>
                 </div>
 
-                <!-- Tasks -->
                 <div class="card">
                     <h3 style="margin-bottom:15px">📋 Mis Tareas <span id="tasksBadge" style="background:#667eea;color:white;padding:4px 12px;border-radius:20px;font-size:14px">0</span></h3>
                     <div class="input-row" style="margin-bottom:15px">
@@ -96,24 +89,22 @@
                             <option value="Física">⚡</option>
                             <option value="Química">🧪</option>
                         </select>
-                        <button onclick="createTask()" class="btn btn-secondary" style="width:auto;padding:12px 20px">+</button>
+                        <button id="createTaskBtn" class="btn btn-secondary" style="width:auto;padding:12px 20px">+</button>
                     </div>
                     <div id="tasksList" class="tasks-list"></div>
                 </div>
 
-                <!-- Focus Mode -->
                 <div class="card">
                     <h3 style="margin-bottom:15px">🍅 Focus Mode</h3>
                     <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
                     <div class="pomodoro-controls">
-                        <button onclick="startFocus()" class="pomodoro-btn start">▶ Iniciar</button>
-                        <button onclick="pauseFocus()" class="pomodoro-btn pause">⏸ Pausar</button>
-                        <button onclick="stopFocus()" class="pomodoro-btn stop">⏹ Detener</button>
+                        <button id="focusStartBtn" class="pomodoro-btn start">▶ Iniciar</button>
+                        <button id="focusPauseBtn" class="pomodoro-btn pause">⏸ Pausar</button>
+                        <button id="focusStopBtn" class="pomodoro-btn stop">⏹ Detener</button>
                     </div>
                     <p style="text-align:center;color:#888;margin-top:15px;font-size:14px">25 min focus + 5 min descanso</p>
                 </div>
 
-                <!-- Status -->
                 <div class="card">
                     <h3 style="margin-bottom:15px">🔌 Estado del Sistema</h3>
                     <div style="margin-bottom:10px;padding:12px;background:#f8f9fa;border-radius:8px;display:flex;justify-content:space-between">
@@ -133,7 +124,6 @@
         </div>
     </div>
 
-    <!-- Toast -->
     <div id="toast" class="toast">
         <span id="toastIcon" style="margin-right:10px"></span>
         <span id="toastMessage"></span>
