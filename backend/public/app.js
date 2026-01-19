@@ -328,47 +328,27 @@
             var isInPlan = todayPlan.find(function(p) { return p.id === t.id; });
             var isSelected = isInPlan ? ' selected' : '';
             
-            var item = document.createElement('div');
-            item.className = 'task-item' + isSelected + (t.isCompleted ? ' completed' : '');
-            item.onclick = function(e) {
-                if (e.target.type !== 'checkbox') {
-                    if (isInPlan) {
-                        removeFromPlan(t.id);
-                    } else {
-                        addToPlan(t.id);
-                    }
-                }
-            };
-            
-            var checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = t.isCompleted;
-            checkbox.addEventListener('change', (function(taskId, completed) {
-                return function() { toggleTask(taskId, completed); };
-            })(t.id, !t.isCompleted));
-            item.appendChild(checkbox);
-            
-            var span = document.createElement('span');
-            span.textContent = t.title;
-            item.appendChild(span);
-            
-            var label = document.createElement('span');
-            label.className = 'task-subject';
-            label.textContent = t.subject;
-            item.appendChild(label);
-            
-            var addBtn = document.createElement('span');
-            addBtn.innerHTML = isInPlan ? '✓' : '+';
-            addBtn.style.cssText = 'font-size:18px;font-weight:bold;color:' + (isInPlan ? 'var(--secondary)' : 'var(--primary)') + ';margin-left:8px;';
-            item.appendChild(addBtn);
-            
-            return item.outerHTML;
+            return '<div class="task-item' + isSelected + (t.isCompleted ? ' completed' : '") onclick="window.handleTaskClick(\'' + t.id + '\')">' +
+                '<input type="checkbox" ' + (t.isCompleted ? 'checked' : '') + ' onchange="event.stopPropagation();window.toggleTask(\'' + t.id + '\',' + (!t.isCompleted) + ')">' +
+                '<span>' + t.title + '</span>' +
+                '<span class="task-subject">' + t.subject + '</span>' +
+                '<span style="font-size:18px;font-weight:bold;color:' + (isInPlan ? 'var(--secondary)' : 'var(--primary)') + ';margin-left:8px;">' + (isInPlan ? '✓' : '+') + '</span>' +
+                '</div>';
         }).join('');
         
         if (mainTasks.length > 10) {
             list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
         }
     }
+
+    window.handleTaskClick = function(taskId) {
+        var isInPlan = todayPlan.find(function(p) { return p.id === taskId; });
+        if (isInPlan) {
+            removeFromPlan(taskId);
+        } else {
+            addToPlan(taskId);
+        }
+    };
 
     async function createTask() {
         var title = document.getElementById('taskTitle').value.trim();
@@ -632,6 +612,7 @@
     window.togglePlanTask = togglePlanTask;
     window.removeFromPlan = removeFromPlan;
     window.addToPlan = addToPlan;
+    window.handleTaskClick = window.handleTaskClick;
 
     document.addEventListener('DOMContentLoaded', init);
 })();
