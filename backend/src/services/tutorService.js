@@ -79,6 +79,9 @@ export class TutorService {
       ? 'https://api.groq.com/openai/v1'
       : 'https://api.openai.com/v1';
 
+    // Updated: Use newer Groq models (llama3.1 replaces llama3)
+    const model = provider === 'groq' ? 'llama-3.1-8b-instant' : 'gpt-4o-mini';
+
     try {
       const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
@@ -87,7 +90,7 @@ export class TutorService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: provider === 'groq' ? 'llama3-8b-8192' : 'gpt-4o-mini',
+          model: model,
           messages,
           temperature: 0.7,
           max_tokens: 500
