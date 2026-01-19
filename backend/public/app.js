@@ -79,6 +79,19 @@
         // Plan buttons
         document.getElementById('startPlanBtn').addEventListener('click', startPlan);
         document.getElementById('clearPlanBtn').addEventListener('click', clearPlan);
+        
+        // Birth date change - show/hide parental consent
+        document.getElementById('regBirthDate').addEventListener('change', function() {
+            var birthDate = new Date(this.value);
+            var age = Math.floor((Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+            var consentGroup = document.getElementById('parentalConsentGroup');
+            if (age < 13) {
+                consentGroup.style.display = 'block';
+            } else {
+                consentGroup.style.display = 'none';
+                document.getElementById('parentalConsent').checked = false;
+            }
+        });
     }
 
     function showToast(message, type) {
@@ -143,11 +156,34 @@
             return;
         }
 
+        var birth = new Date(birthDate);
+        var age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+
+        if (age < 8 || age > 18) {
+            showToast('La edad debe estar entre 8 y 18 años', 'error');
+            return;
+        }
+
+        var parentalConsent = false;
+        if (age < 13) {
+            parentalConsent = document.getElementById('parentalConsent').checked;
+            if (!parentalConsent) {
+                showToast('Se requiere consentimiento parental para menores de 13 años', 'error');
+                return;
+            }
+        }
+
         try {
             var res = await fetch(API_URL + '/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, password: password, birthDate: birthDate, role: role })
+                body: JSON.stringify({ 
+                    email: email, 
+                    password: password, 
+                    birthDate: birthDate, 
+                    role: role,
+                    parentalConsent: parentalConsent
+                })
             });
             var data = await res.json();
             
@@ -595,6 +631,7 @@
     // Make functions globally accessible for inline handlers
     window.togglePlanTask = togglePlanTask;
     window.removeFromPlan = removeFromPlan;
+    window.addToPlan = addToPlan;
 
     document.addEventListener('DOMContentLoaded', init);
 })();

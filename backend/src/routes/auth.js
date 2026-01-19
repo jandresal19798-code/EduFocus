@@ -8,7 +8,7 @@ const router = Router();
 
 router.post('/register', async (req, res, next) => {
   try {
-    const { email, password, birthDate, role, parentId, ageGroup } = req.body;
+    const { email, password, birthDate, role, parentId, ageGroup, parentalConsent } = req.body;
 
     if (!email || !password || !birthDate) {
       throw new AppError('Email, contraseña y fecha de nacimiento son requeridos', 400);
@@ -20,7 +20,7 @@ router.post('/register', async (req, res, next) => {
     } catch (dbError) {
       return res.status(503).json({
         error: 'Database unavailable',
-        message: 'La base de datos no está disponible. Verifica que DATABASE_URL esté configurada correctamente.',
+        message: 'La base de datos no está disponible. Verifica que DATABASE_URL esté configurado correctamente.',
         hint: 'Asegúrate de que tu PostgreSQL en Render esté activo y la conexión sea correcta.'
       });
     }
@@ -32,11 +32,19 @@ router.post('/register', async (req, res, next) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const birth = new Date(birthDate);
+    
+    if (isNaN(birth.getTime())) {
+      throw new AppError('Fecha de nacimiento inválida', 400);
+    }
+    
     const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
     if (role === 'STUDENT') {
       if (age < 8 || age > 18) {
         throw new AppError('La edad debe estar entre 8 y 18 años', 400);
+      }
+      if (age < 13 && parentalConsent !== true) {
+        throw new AppError('Para menores de 13 años se requiere consentimiento parental', 400);
       }
     }
 
@@ -46,7 +54,7 @@ router.post('/register', async (req, res, next) => {
         passwordHash,
         birthDate: birth,
         role: role || 'STUDENT',
-        parentalConsent: age < 13 ? req.body.parentalConsent === true : true,
+        parentalConsent: age < 13 ? parentalConsent === true : true,
         parentId: role === 'STUDENT' ? parentId : null
       }
     });
