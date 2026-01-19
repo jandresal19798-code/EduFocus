@@ -328,7 +328,7 @@
             var isInPlan = todayPlan.find(function(p) { return p.id === t.id; });
             var isSelected = isInPlan ? ' selected' : '';
             var checkAttr = t.isCompleted ? 'checked' : '';
-            var checkToggle = 'window.toggleTask(\\'' + t.id + '\\',' + (!t.isCompleted) + ')';
+            var checkToggle = "window.toggleTask('" + t.id + "'," + (!t.isCompleted) + ")";
             var icon = isInPlan ? '✓' : '+';
             var iconColor = isInPlan ? 'var(--secondary)' : 'var(--primary)';
             
@@ -472,8 +472,8 @@
         container.innerHTML = todayPlan.map(function(task, index) {
             var isCompleted = task.isCompleted || false;
             var checkAttr = isCompleted ? 'checked' : '';
-            var toggleFunc = 'window.togglePlanTask(\\'' + task.id + '\\')';
-            var removeFunc = 'window.removeFromPlan(\\'' + task.id + '\\')';
+            var toggleFunc = "window.togglePlanTask('" + task.id + "')";
+            var removeFunc = "window.removeFromPlan('" + task.id + "')";
             return '<div class="plan-item' + (isCompleted ? ' completed' : '') + '" data-plan-id="' + task.id + '">' +
                 '<span class="plan-number">' + (index + 1) + '</span>' +
                 '<input type="checkbox" ' + checkAttr + ' onchange="' + toggleFunc + '">' +
