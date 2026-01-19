@@ -69,7 +69,8 @@ export class TutorService {
   async callLLM(messages, context) {
     const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
     
-    if (!apiKey || apiKey === 'your-api-key-here') {
+    if (!apiKey || apiKey === 'your-api-key-here' || apiKey.startsWith('gsk_') === false) {
+      console.log('TutorService: No valid API key, using mock response');
       return this.getMockResponse(messages[messages.length - 1].content);
     }
 
@@ -78,25 +79,42 @@ export class TutorService {
       ? 'https://api.groq.com/openai/v1'
       : 'https://api.openai.com/v1';
 
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: provider === 'groq' ? 'llama3-8b-8192' : 'gpt-4o-mini',
-        messages,
-        temperature: 0.7,
-        max_tokens: 500
-      })
-    });
+    try {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: provider === 'groq' ? 'llama3-8b-8192' : 'gpt-4o-mini',
+          messages,
+          temperature: 0.7,
+          max_tokens: 500
+        })
+      });
 
-    const data = await response.json();
-    return {
-      reply: data.choices[0].message.content,
-      nextQuestion: this.generateFollowUpQuestion(messages[messages.length - 1].content)
-    };
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('TutorService: API error:', response.status, errorData);
+        return this.getMockResponse(messages[messages.length - 1].content);
+      }
+
+      const data = await response.json();
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('TutorService: Invalid response format:', data);
+        return this.getMockResponse(messages[messages.length - 1].content);
+      }
+
+      return {
+        reply: data.choices[0].message.content,
+        nextQuestion: this.generateFollowUpQuestion(messages[messages.length - 1].content)
+      };
+    } catch (error) {
+      console.error('TutorService: API call failed:', error.message);
+      return this.getMockResponse(messages[messages.length - 1].content);
+    }
   }
 
   getMockResponse(userMessage) {
