@@ -101,7 +101,9 @@
         var msg = document.getElementById('toastMessage');
         
         toast.className = 'toast';
-        toast.classList.add(type === 'success' ? '' : 'error');
+        if (type !== 'success') {
+            toast.classList.add('error');
+        }
         icon.textContent = type === 'success' ? '✓' : '✗';
         msg.textContent = message;
         toast.classList.add('show');
