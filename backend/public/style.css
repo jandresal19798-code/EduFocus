@@ -223,6 +223,30 @@ body {
   transition: var(--transition);
 }
 
+.card.tasks-card {
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+}
+
+.card.tasks-card .card-header {
+  flex-shrink: 0;
+}
+
+.card.tasks-card .task-form {
+  flex-shrink: 0;
+}
+
+.card.tasks-card .filter-btn-container {
+  flex-shrink: 0;
+}
+
+.card.tasks-card .tasks-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
 .card-header {
   display: flex;
   align-items: center;
@@ -626,8 +650,9 @@ body {
 }
 
 .task-item.selected {
-  border-color: var(--primary);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+  border-color: var(--secondary) !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
 
 .task-item input[type="checkbox"] {
@@ -653,9 +678,11 @@ body {
 }
 
 .tasks-list {
-  max-height: 350px;
+  max-height: 320px;
   overflow-y: auto;
   padding-right: 8px;
+  flex: 1;
+  min-height: 100px;
 }
 
 .tasks-list::-webkit-scrollbar {

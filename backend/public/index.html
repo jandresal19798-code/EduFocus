@@ -162,7 +162,7 @@
                 </div>
 
                 <!-- Tasks -->
-                <div class="card">
+                <div class="card tasks-card">
                     <div class="card-header">
                         <h2 class="card-title">📋 Mis Tareas</h2>
                         <span class="tasks-badge" id="tasksBadge">0</span>
@@ -180,12 +180,12 @@
                         </select>
                         <button class="btn btn-secondary btn-small" id="createTaskBtn">+</button>
                     </div>
-                    <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <div class="filter-btn-container" style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
                         <button class="filter-btn active" data-filter="all">Todas</button>
                         <button class="filter-btn" data-filter="Pendiente">Pendientes</button>
                         <button class="filter-btn" data-filter="Completada">Completadas</button>
                     </div>
-                    <div id="tasksList"></div>
+                    <div id="tasksList" class="tasks-list"></div>
                     <div class="seed-section">
                         <button class="seed-btn" id="seedBtn">🌱 Agregar 100 tareas educativas</button>
                     </div>
