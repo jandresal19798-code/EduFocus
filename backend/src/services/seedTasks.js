@@ -1525,7 +1525,8 @@ const tasks = [
 ];
 
 async function seedTasks(userId = null) {
-  console.log('🌱 Iniciando seed de tareas educativas...\n');
+  console.log('🌱 Iniciando seed de tareas educativas...');
+  console.log('UserId recibido:', userId);
 
   try {
     let user;
@@ -1533,16 +1534,18 @@ async function seedTasks(userId = null) {
       user = await prisma.user.findUnique({
         where: { id: userId }
       });
+      console.log('Usuario por ID:', user ? 'Encontrado' : 'No encontrado');
     }
     
     if (!user) {
+      console.log('Buscando usuario STUDENT...');
       user = await prisma.user.findFirst({
         where: { role: 'STUDENT' }
       });
     }
 
     if (!user) {
-      console.log('❌ No hay usuarios registrados. Por favor regístrate primero.');
+      console.log('❌ No hay usuarios registrados.');
       return { error: 'No user found' };
     }
 
@@ -1590,8 +1593,9 @@ async function seedTasks(userId = null) {
 
     console.log(`\n🎉 Seed completado!`);
     console.log(`   Tareas creadas: ${created}`);
-    console.log(`   Tareas saltadas (ya existían): ${skipped}`);
-    console.log(`   Total tareas disponibles: ${tasks.length}`);
+    console.log(`   Tareas saltadas: ${skipped}`);
+
+    return { created, skipped, total: tasks.length };
 
   } catch (error) {
     console.error('❌ Error durante el seed:', error);

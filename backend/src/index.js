@@ -102,14 +102,19 @@ app.post('/api/seed-tasks', async (req, res) => {
     
     // Get the user from the token
     const jwt = await import('jsonwebtoken');
-    const decoded = jwt.default.verify(authHeader.split(' ')[1], process.env.JWT_SECRET || 'edufocus-secret-key-change-in-production');
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.default.verify(token, process.env.JWT_SECRET || 'edufocus-secret-key-change-in-production');
     const userId = decoded.id;
     
     // Import and run seed with userId
     const { default: seedTasks } = await import('./services/seedTasks.js');
-    await seedTasks(userId);
+    const result = await seedTasks(userId);
     
-    res.json({ message: 'Tareas educativas sembradas correctamente' });
+    if (result && result.error) {
+      return res.status(500).json({ error: result.error });
+    }
+    
+    res.json({ message: 'Tareas educativas sembradas correctamente', userId });
   } catch (error) {
     console.error('Error en seed:', error);
     res.status(500).json({ error: error.message });
