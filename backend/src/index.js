@@ -81,6 +81,30 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API funciona correctamente', version: '1.0.0' });
 });
 
+// Seed educational tasks (admin only)
+app.post('/api/seed-tasks', async (req, res) => {
+  try {
+    const { default: seedTasks } = await import('./services/seedTasks.js');
+    
+    // Check if user is admin (for security)
+    const user = await prisma.user.findFirst({
+      where: { role: 'ADMIN' }
+    });
+    
+    // Allow any authenticated user to seed for testing
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'No autorizado' });
+    }
+    
+    await seedTasks();
+    res.json({ message: 'Tareas educativas sembradas correctamente' });
+  } catch (error) {
+    console.error('Error en seed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Direct test route for register
 app.post('/api/register-direct', async (req, res) => {
   try {

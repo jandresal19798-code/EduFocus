@@ -10,7 +10,8 @@
     "postinstall": "npx prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "seed": "node src/services/seedTasks.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

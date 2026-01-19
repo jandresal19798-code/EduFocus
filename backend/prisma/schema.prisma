@@ -125,6 +125,19 @@ model StudySession {
   subject     String
   taskId      String?
   isActive    Boolean  @default(false)
+  
+  pomodoros   PomodoroSession[]
+}
+
+model PomodoroSession {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type      String
+  startTime DateTime
+  endTime   DateTime?
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model ContentUpload {
