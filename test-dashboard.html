@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFocus - Dashboard de Prueba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-indigo-600">🎓 EduFocus</h1>
+                    <p class="text-gray-600">Tu asistente de aprendizaje inteligente</p>
+                </div>
+                <div id="userInfo" class="hidden">
+                    <span class="text-gray-700">Hola, <span id="userName" class="font-semibold"></span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Auth Section -->
+        <section id="authSection" class="bg-white rounded-xl shadow-lg p-6 mb-6 fade-in">
+            <h2 class="text-xl font-semibold mb-4">🔐 Autenticación</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-medium mb-2">Registro</h3>
+                    <input type="email" id="regEmail" placeholder="Email" class="w-full p-2 border rounded mb-2">
+                    <input type="password" id="regPassword" placeholder="Contraseña" class="w-full p-2 border rounded mb-2">
+                    <input type="date" id="regBirthDate" class="w-full p-2 border rounded mb-2">
+                    <select id="regRole" class="w-full p-2 border rounded mb-2">
+                        <option value="STUDENT">Estudiante</option>
+                        <option value="PARENT">Padre</option>
+                    </select>
+                    <button onclick="register()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Registrarse</button>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">Login</h3>
+                    <input type="email" id="loginEmail" placeholder="Email" class="w-full p-2 border rounded mb-2">
+                    <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full p-2 border rounded mb-2">
+                    <button onclick="login()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Iniciar Sesión</button>
+                </div>
+            </div>
+            <div id="authResult" class="mt-4 p-3 rounded hidden"></div>
+        </section>
+
+        <!-- Dashboard (shown after auth) -->
+        <div id="dashboard" class="hidden">
+            <!-- Stats -->
+            <section class="grid md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow p-4 fade-in">
+                    <div class="text-3xl font-bold text-indigo-600" id="level">1</div>
+                    <div class="text-gray-600">Nivel</div>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 fade-in">
+                    <div class="text-3xl font-bold text-yellow-500" id="xp">0</div>
+                    <div class="text-gray-600">XP Total</div>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 fade-in">
+                    <div class="text-3xl font-bold text-orange-500" id="streak">0</div>
+                    <div class="text-gray-600">Días Racha</div>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 fade-in">
+                    <div class="text-3xl font-bold text-green-500" id="tasksCount">0</div>
+                    <div class="text-gray-600">Tareas</div>
+                </div>
+            </section>
+
+            <!-- Main Grid -->
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Tutor IA -->
+                <section class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <h2 class="text-xl font-semibold mb-4">🤖 Tutor IA</h2>
+                    <div id="tutorChat" class="h-64 overflow-y-auto border rounded p-4 mb-4 bg-gray-50">
+                        <div class="text-gray-500 text-center">Inicia una conversación con tu tutor...</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="tutorInput" placeholder="Escribe tu pregunta..." class="flex-1 p-2 border rounded">
+                        <button onclick="sendTutorMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Enviar</button>
+                    </div>
+                </section>
+
+                <!-- Tasks -->
+                <section class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <h2 class="text-xl font-semibold mb-4">📋 Tareas</h2>
+                    <div id="tasksList" class="space-y-2 mb-4 max-h-48 overflow-y-auto">
+                        <!-- Tasks will be loaded here -->
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="taskTitle" placeholder="Nueva tarea..." class="flex-1 p-2 border rounded">
+                        <input type="text" id="taskSubject" placeholder="Materia" class="w-24 p-2 border rounded">
+                        <button onclick="createTask()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+</button>
+                    </div>
+                </section>
+
+                <!-- Focus Mode -->
+                <section class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <h2 class="text-xl font-semibold mb-4">🍅 Focus Mode</h2>
+                    <div class="text-center">
+                        <div id="pomodoroDisplay" class="text-5xl font-bold text-indigo-600 mb-4">25:00</div>
+                        <div class="flex justify-center gap-2 mb-4">
+                            <button onclick="startFocus()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">Iniciar</button>
+                            <button onclick="pauseFocus()" class="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-600">Pausar</button>
+                            <button onclick="stopFocus()" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600">Detener</button>
+                        </div>
+                        <p class="text-gray-600 text-sm">Usa la técnica Pomodoro: 25 min de enfoque + 5 min de descanso</p>
+                    </div>
+                </section>
+
+                <!-- API Status -->
+                <section class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <h2 class="text-xl font-semibold mb-4">🔌 Estado de la API</h2>
+                    <div id="apiStatus" class="space-y-2">
+                        <div class="flex justify-between p-2 bg-gray-100 rounded">
+                            <span>API Health</span>
+                            <span id="apiHealth" class="text-green-600 font-semibold">Verificando...</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-gray-100 rounded">
+                            <span>Database</span>
+                            <span id="apiDb" class="text-green-600 font-semibold">Verificando...</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-gray-100 rounded">
+                            <span>Versión</span>
+                            <span id="apiVersion" class="text-gray-600">-</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://edufocus-api.onrender.com/api';
+        let token = localStorage.getItem('edufocus_token');
+        let focusInterval = null;
+        let focusTime = 25 * 60;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkApiStatus();
+            if (token) {
+                loadUserProfile();
+            }
+        });
+
+        // API Status
+        async function checkApiStatus() {
+            try {
+                const res = await fetch(`${API_URL}/health`);
+                const data = await res.json();
+                document.getElementById('apiHealth').textContent = data.status === 'ok' ? '✅ Online' : '❌ Offline';
+                document.getElementById('apiDb').textContent = data.database === 'connected' ? '✅ Conectada' : '⚠️ Desconectada';
+                
+                const testRes = await fetch(`${API_URL}/test`);
+                const testData = await testRes.json();
+                document.getElementById('apiVersion').textContent = testData.version || '1.0.0';
+            } catch (e) {
+                document.getElementById('apiHealth').textContent = '❌ Error';
+                document.getElementById('apiDb').textContent = '❌ Error';
+            }
+        }
+
+        // Auth
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const birthDate = document.getElementById('regBirthDate').value;
+            const role = document.getElementById('regRole').value;
+
+            if (!email || !password || !birthDate) {
+                showAuthResult('❌ Todos los campos son requeridos', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, birthDate, role })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.token;
+                    localStorage.setItem('edufocus_token', token);
+                    showAuthResult('✅ Registro exitoso!', 'success');
+                    loadUserProfile();
+                } else {
+                    showAuthResult(`❌ ${data.error || data.message || 'Error'}`, 'error');
+                }
+            } catch (e) {
+                showAuthResult('❌ Error de conexión', 'error');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showAuthResult('❌ Email y contraseña requeridos', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.token;
+                    localStorage.setItem('edufocus_token', token);
+                    showAuthResult('✅ Login exitoso!', 'success');
+                    loadUserProfile();
+                } else {
+                    showAuthResult(`❌ ${data.error || 'Credenciales inválidas'}`, 'error');
+                }
+            } catch (e) {
+                showAuthResult('❌ Error de conexión', 'error');
+            }
+        }
+
+        function showAuthResult(msg, type) {
+            const el = document.getElementById('authResult');
+            el.textContent = msg;
+            el.className = `mt-4 p-3 rounded ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            el.classList.remove('hidden');
+        }
+
+        // User Profile
+        async function loadUserProfile() {
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${API_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    document.getElementById('userName').textContent = data.profile?.displayName || data.user?.email;
+                    document.getElementById('level').textContent = data.profile?.level || 1;
+                    document.getElementById('xp').textContent = data.profile?.totalXP || 0;
+                    document.getElementById('streak').textContent = data.profile?.currentStreak || 0;
+                    
+                    loadTasks();
+                }
+            } catch (e) {
+                console.error('Error loading profile:', e);
+            }
+        }
+
+        // Tasks
+        async function loadTasks() {
+            try {
+                const res = await fetch(`${API_URL}/tasks`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    const tasks = data.tasks || [];
+                    document.getElementById('tasksCount').textContent = tasks.length;
+                    
+                    const list = document.getElementById('tasksList');
+                    list.innerHTML = tasks.map(t => `
+                        <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                            <input type="checkbox" ${t.isCompleted ? 'checked' : ''} onchange="toggleTask('${t.id}', ${!t.isCompleted})">
+                            <span class="${t.isCompleted ? 'line-through text-gray-400' : ''}">${t.title}</span>
+                            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${t.subject}</span>
+                        </div>
+                    `).join('') || '<div class="text-gray-500 text-center">No hay tareas aún</div>';
+                }
+            } catch (e) {
+                console.error('Error loading tasks:', e);
+            }
+        }
+
+        async function createTask() {
+            const title = document.getElementById('taskTitle').value;
+            const subject = document.getElementById('taskSubject').value || 'General';
+
+            if (!title) return;
+
+            try {
+                const res = await fetch(`${API_URL}/tasks`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        subject,
+                        description: 'Tarea creada desde dashboard',
+                        estimatedMinutes: 30,
+                        difficulty: 3
+                    })
+                });
+
+                if (res.ok) {
+                    document.getElementById('taskTitle').value = '';
+                    document.getElementById('taskSubject').value = '';
+                    loadTasks();
+                }
+            } catch (e) {
+                console.error('Error creating task:', e);
+            }
+        }
+
+        async function toggleTask(id, completed) {
+            try {
+                await fetch(`${API_URL}/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isCompleted: completed })
+                });
+                loadTasks();
+            } catch (e) {
+                console.error('Error toggling task:', e);
+            }
+        }
+
+        // Tutor
+        async function sendTutorMessage() {
+            const input = document.getElementById('tutorInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chat = document.getElementById('tutorChat');
+            chat.innerHTML += `<div class="mb-2 p-2 bg-indigo-100 rounded"><strong>Tu:</strong> ${message}</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch(`${API_URL}/tutor/conversations`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        subject: 'General',
+                        topic: 'Ayuda',
+                        initialMessage: message
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    chat.innerHTML += `<div class="mb-2 p-2 bg-green-100 rounded"><strong>Tutor:</strong> ${data.tutorResponse}</div>`;
+                    chat.innerHTML += `<div class="text-sm text-gray-500 mb-2">💡 ${data.nextQuestion}</div>`;
+                } else {
+                    chat.innerHTML += `<div class="mb-2 p-2 bg-red-100 rounded">❌ Error: ${data.error || 'No se pudo procesar'}</div>`;
+                }
+            } catch (e) {
+                chat.innerHTML += `<div class="mb-2 p-2 bg-red-100 rounded">❌ Error de conexión</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Focus Mode
+        function startFocus() {
+            if (focusInterval) clearInterval(focusInterval);
+            focusInterval = setInterval(() => {
+                focusTime--;
+                const min = Math.floor(focusTime / 60);
+                const sec = focusTime % 60;
+                document.getElementById('pomodoroDisplay').textContent = 
+                    `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+                
+                if (focusTime <= 0) {
+                    clearInterval(focusInterval);
+                    alert('🎉 ¡Tiempo completado! Descansa 5 minutos.');
+                    focusTime = 25 * 60;
+                }
+            }, 1000);
+        }
+
+        function pauseFocus() {
+            if (focusInterval) {
+                clearInterval(focusInterval);
+                focusInterval = null;
+            }
+        }
+
+        function stopFocus() {
+            if (focusInterval) clearInterval(focusInterval);
+            focusTime = 25 * 60;
+            document.getElementById('pomodoroDisplay').textContent = '25:00';
+        }
+    </script>
+</body>
+</html>
