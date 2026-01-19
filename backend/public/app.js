@@ -1,4 +1,4 @@
-// EduFocus App - Main JavaScript
+// EduFocus App - Complete JavaScript
 (function() {
     'use strict';
     
@@ -8,30 +8,60 @@
     let focusTime = 25 * 60;
     let focusRunning = false;
 
+    // Theme Management
+    function initTheme() {
+        const savedTheme = localStorage.getItem('edufocus_theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        } else if (prefersDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('edufocus_theme', newTheme);
+    }
+
     function init() {
-        checkApiStatus();
+        initTheme();
         attachEventListeners();
+        checkApiStatus();
         if (token) {
             loadUserProfile();
         }
     }
 
     function attachEventListeners() {
-        document.getElementById('registerBtn').addEventListener('click', register);
-        document.getElementById('loginBtn').addEventListener('click', login);
+        // Auth forms
+        document.getElementById('registerForm').addEventListener('submit', handleRegister);
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('demoBtn').addEventListener('click', useDemoAccount);
+        
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        
+        // Logout
         document.getElementById('logoutBtn').addEventListener('click', logout);
+        
+        // Actions
         document.getElementById('tutorSendBtn').addEventListener('click', sendTutorMessage);
         document.getElementById('createTaskBtn').addEventListener('click', createTask);
+        document.getElementById('seedBtn').addEventListener('click', seedTasks);
+        
+        // Focus mode
         document.getElementById('focusStartBtn').addEventListener('click', startFocus);
         document.getElementById('focusPauseBtn').addEventListener('click', pauseFocus);
         document.getElementById('focusStopBtn').addEventListener('click', stopFocus);
         
-        var tutorInput = document.getElementById('tutorInput');
-        if (tutorInput) {
-            tutorInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') sendTutorMessage();
-            });
-        }
+        // Enter key for tutor input
+        document.getElementById('tutorInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendTutorMessage();
+        });
     }
 
     function showToast(message, type) {
@@ -41,7 +71,7 @@
         var msg = document.getElementById('toastMessage');
         
         toast.className = 'toast';
-        toast.classList.add(type === 'success' ? 'toast-success' : 'toast-error');
+        toast.classList.add(type === 'success' ? '' : 'error');
         icon.textContent = type === 'success' ? '✓' : '✗';
         msg.textContent = message;
         toast.classList.add('show');
@@ -55,27 +85,32 @@
         try {
             var res = await fetch(API_URL + '/health');
             var data = await res.json();
+            
             var healthEl = document.getElementById('apiHealth');
             var dbEl = document.getElementById('apiDb');
+            var apiUrlEl = document.getElementById('apiUrl');
             
             if (data.status === 'ok') {
-                healthEl.innerHTML = '<span style="color:#48bb78">● Conectado</span>';
+                healthEl.innerHTML = '<span class="status-dot green"></span> Conectado';
             } else {
-                healthEl.innerHTML = '<span style="color:#f56565">● Error</span>';
+                healthEl.innerHTML = '<span class="status-dot red"></span> Error';
             }
             
             if (data.database === 'connected') {
-                dbEl.innerHTML = '<span style="color:#48bb78">● Conectada</span>';
+                dbEl.innerHTML = '<span class="status-dot green"></span> Conectada';
             } else {
-                dbEl.innerHTML = '<span style="color:#ecc94b">● Desconectada</span>';
+                dbEl.innerHTML = '<span class="status-dot yellow"></span> Desconectada';
             }
+            
+            apiUrlEl.textContent = window.location.origin;
         } catch (e) {
-            document.getElementById('apiHealth').innerHTML = '<span style="color:#f56565">● Error</span>';
-            document.getElementById('apiDb').innerHTML = '<span style="color:#f56565">● Error</span>';
+            document.getElementById('apiHealth').innerHTML = '<span class="status-dot red"></span> Error';
+            document.getElementById('apiDb').innerHTML = '<span class="status-dot red"></span> Error';
         }
     }
 
-    async function register() {
+    async function handleRegister(e) {
+        e.preventDefault();
         var email = document.getElementById('regEmail').value;
         var password = document.getElementById('regPassword').value;
         var birthDate = document.getElementById('regBirthDate').value;
@@ -112,7 +147,8 @@
         }
     }
 
-    async function login() {
+    async function handleLogin(e) {
+        e.preventDefault();
         var email = document.getElementById('loginEmail').value;
         var password = document.getElementById('loginPassword').value;
 
@@ -140,6 +176,12 @@
         } catch (e) {
             showToast('Error de conexión', 'error');
         }
+    }
+
+    function useDemoAccount() {
+        document.getElementById('loginEmail').value = 'demo1768782439@example.com';
+        document.getElementById('loginPassword').value = 'demo123456';
+        handleLogin({ preventDefault: function() {} });
     }
 
     function logout() {
@@ -202,14 +244,15 @@
             
             if (res.ok) {
                 var tasks = data.tasks || [];
-                document.getElementById('tasksCount').textContent = tasks.length;
-                document.getElementById('tasksBadge').textContent = tasks.length;
+                var mainTasks = tasks.filter(function(t) { return t.subtasks && t.subtasks.length > 0; });
+                document.getElementById('tasksCount').textContent = mainTasks.length;
+                document.getElementById('tasksBadge').textContent = mainTasks.length;
                 
                 var list = document.getElementById('tasksList');
-                if (tasks.length === 0) {
-                    list.innerHTML = '<p style="color:#888;text-align:center;padding:30px">No tienes tareas pendientes</p>';
+                if (mainTasks.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No tienes tareas pendientes</p></div>';
                 } else {
-                    list.innerHTML = tasks.map(function(t) {
+                    list.innerHTML = mainTasks.slice(0, 10).map(function(t) {
                         var checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.checked = t.isCompleted;
@@ -226,14 +269,16 @@
                         item.appendChild(span);
                         
                         var label = document.createElement('span');
-                        label.style.fontSize = '12px';
-                        label.style.color = '#888';
-                        label.style.marginLeft = 'auto';
+                        label.className = 'task-subject';
                         label.textContent = t.subject;
                         item.appendChild(label);
                         
-                        return item;
-                    }).map(function(el) { return el.outerHTML; }).join('');
+                        return item.outerHTML;
+                    }).join('');
+                    
+                    if (mainTasks.length > 10) {
+                        list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
+                    }
                 }
             }
         } catch (e) {
@@ -289,9 +334,32 @@
                 body: JSON.stringify({ isCompleted: completed })
             });
             loadTasks();
-            if (completed) showToast('¡Tarea completada!');
+            if (completed) showToast('¡Tarea completada! 🎉');
         } catch (e) {
             console.error('Error toggling task:', e);
+        }
+    }
+
+    async function seedTasks() {
+        try {
+            showToast('Agregando tareas...', 'success');
+            var res = await fetch(API_URL + '/seed-tasks', {
+                method: 'POST',
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+            var data = await res.json();
+            
+            if (res.ok) {
+                showToast('¡100 tareas educativas agregadas! 🎉');
+                loadTasks();
+            } else {
+                showToast(data.error || 'Error al sembrar tareas', 'error');
+            }
+        } catch (e) {
+            showToast('Error de conexión', 'error');
         }
     }
 
@@ -304,13 +372,12 @@
         
         var userMsg = document.createElement('div');
         userMsg.className = 'message user';
-        userMsg.style.marginLeft = 'auto';
-        userMsg.style.maxWidth = '85%';
         userMsg.textContent = message;
         chat.appendChild(userMsg);
         
         input.value = '';
         chat.scrollTop = chat.scrollHeight;
+        document.getElementById('tutorStatus').innerHTML = '<span class="status-dot yellow"></span> Pensando...';
 
         try {
             var res = await fetch(API_URL + '/tutor/conversations', {
@@ -330,31 +397,29 @@
             if (res.ok) {
                 var botMsg = document.createElement('div');
                 botMsg.className = 'message bot';
-                botMsg.style.maxWidth = '85%';
                 botMsg.textContent = data.tutorResponse;
                 chat.appendChild(botMsg);
                 
-                var hint = document.createElement('p');
-                hint.style.fontSize = '12px';
-                hint.style.color = '#667eea';
-                hint.style.margin = '5px 0 15px 0';
+                var hint = document.createElement('div');
+                hint.className = 'message-hint';
                 hint.textContent = '💡 ' + data.nextQuestion;
                 chat.appendChild(hint);
+                
+                document.getElementById('tutorStatus').innerHTML = '<span class="status-dot green"></span> Activo';
             } else {
                 var errorMsg = document.createElement('div');
                 errorMsg.className = 'message bot';
-                errorMsg.style.maxWidth = '85%';
-                errorMsg.style.background = '#fed7d7';
-                errorMsg.style.color = '#c53030';
+                errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+                errorMsg.style.color = '#ef4444';
                 errorMsg.textContent = data.error || 'No se pudo procesar';
                 chat.appendChild(errorMsg);
+                document.getElementById('tutorStatus').innerHTML = '<span class="status-dot yellow"></span> Modo básico';
             }
         } catch (e) {
             var connError = document.createElement('div');
             connError.className = 'message bot';
-            connError.style.maxWidth = '85%';
-            connError.style.background = '#fed7d7';
-            connError.style.color = '#c53030';
+            connError.style.background = 'rgba(239, 68, 68, 0.1)';
+            connError.style.color = '#ef4444';
             connError.textContent = 'Error de conexión';
             chat.appendChild(connError);
         }
@@ -376,12 +441,12 @@
             if (focusTime <= 0) {
                 clearInterval(focusInterval);
                 focusRunning = false;
-                showToast('¡Tiempo completado! Descansa 5 minutos');
+                showToast('¡Tiempo completado! Descansa 5 minutos 🍅');
                 focusTime = 25 * 60;
                 document.getElementById('pomodoroDisplay').textContent = '25:00';
             }
         }, 1000);
-        showToast('¡Focus started!');
+        showToast('¡Focus started! 🎯');
     }
 
     function pauseFocus() {
