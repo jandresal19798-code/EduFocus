@@ -83,6 +83,26 @@
 
         <!-- Dashboard -->
         <div id="dashboard" class="hidden">
+            
+            <!-- Today's Plan Section -->
+            <section class="card" id="todayPlanSection">
+                <div class="card-header">
+                    <h2 class="card-title">📅 Mi Plan de Hoy</h2>
+                    <span class="tasks-badge" id="planBadge">0</span>
+                </div>
+                <div id="todayPlanList" class="tasks-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <p>Agrega tareas a tu plan de hoy</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Selecciona tareas de "Mis Tareas" o pide ayuda al Tutor</p>
+                    </div>
+                </div>
+                <div class="plan-actions" style="margin-top: 16px; display: flex; gap: 12px;">
+                    <button class="btn btn-primary" id="startPlanBtn" style="flex: 1;">🚀 Iniciar mi plan</button>
+                    <button class="btn btn-secondary" id="clearPlanBtn" style="flex: 1;">🗑️ Limpiar plan</button>
+                </div>
+            </section>
+
             <!-- Stats -->
             <section class="stats-grid">
                 <div class="stat-card">
@@ -126,10 +146,11 @@
                         <div class="empty-state">
                             <div class="empty-state-icon">💡</div>
                             <p>Pregúntame sobre cualquier tema:<br>Matemáticas, Historia, Ciencias...</p>
+                            <p style="font-size: 12px; margin-top: 8px;">✨ ¡Puedo crearte un plan de estudio personalizado!</p>
                         </div>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="tutorInput" placeholder="Escribe tu pregunta aquí...">
+                        <input type="text" id="tutorInput" placeholder="Escribe tu pregunta o pide un plan de estudio...">
                         <button class="btn btn-primary" id="tutorSendBtn">Enviar</button>
                     </div>
                 </div>
@@ -152,6 +173,11 @@
                             <option value="Química">🧪</option>
                         </select>
                         <button class="btn btn-secondary btn-small" id="createTaskBtn">+</button>
+                    </div>
+                    <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="filter-btn active" data-filter="all">Todas</button>
+                        <button class="filter-btn" data-filter="Pendiente">Pendientes</button>
+                        <button class="filter-btn" data-filter="Completada">Completadas</button>
                     </div>
                     <div id="tasksList"></div>
                     <div class="seed-section">

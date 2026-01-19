@@ -516,6 +516,157 @@ body {
   color: var(--text-muted-dark);
 }
 
+/* Filter Buttons */
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted-light);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  border-color: transparent;
+  color: white;
+}
+
+/* Plan Section */
+.plan-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.plan-item:hover {
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.plan-item input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--secondary);
+  cursor: pointer;
+}
+
+.plan-item span {
+  flex: 1;
+  font-weight: 500;
+}
+
+.plan-item.completed {
+  opacity: 0.6;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.plan-item.completed span {
+  text-decoration: line-through;
+}
+
+.plan-subject {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: white;
+  border-radius: 10px;
+}
+
+.plan-number {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.plan-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Task Selection in My Tasks */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card-light);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  transition: var(--transition);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.task-item:hover {
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.task-item.selected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+}
+
+.task-item input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.task-item.add-plan-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+  border: 2px dashed rgba(99, 102, 241, 0.3);
+  color: var(--primary);
+  font-weight: 600;
+  justify-content: center;
+}
+
+.task-item.add-plan-btn:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1));
+  border-style: solid;
+}
+
+.tasks-list {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.tasks-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tasks-list::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
 /* Task Form */
 .task-form {
   display: flex;

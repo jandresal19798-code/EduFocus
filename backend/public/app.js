@@ -7,6 +7,9 @@
     let focusInterval = null;
     let focusTime = 25 * 60;
     let focusRunning = false;
+    let todayPlan = JSON.parse(localStorage.getItem('edufocus_todayPlan') || '[]');
+    let allTasks = [];
+    let currentFilter = 'all';
 
     // Theme Management
     function initTheme() {
@@ -62,6 +65,20 @@
         document.getElementById('tutorInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') sendTutorMessage();
         });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderTasks();
+            });
+        });
+
+        // Plan buttons
+        document.getElementById('startPlanBtn').addEventListener('click', startPlan);
+        document.getElementById('clearPlanBtn').addEventListener('click', clearPlan);
     }
 
     function showToast(message, type) {
@@ -210,6 +227,7 @@
                 document.getElementById('userNameDisplay').textContent = displayName;
                 
                 updateStats(data.profile);
+                renderTodayPlan();
                 loadTasks();
             } else {
                 localStorage.removeItem('edufocus_token');
@@ -243,46 +261,76 @@
             var data = await res.json();
             
             if (res.ok) {
-                var tasks = data.tasks || [];
-                var mainTasks = tasks.filter(function(t) { return t.subtasks && t.subtasks.length > 0; });
+                allTasks = data.tasks || [];
+                var mainTasks = allTasks.filter(function(t) { return t.subtasks && t.subtasks.length > 0; });
                 document.getElementById('tasksCount').textContent = mainTasks.length;
                 document.getElementById('tasksBadge').textContent = mainTasks.length;
                 
-                var list = document.getElementById('tasksList');
-                if (mainTasks.length === 0) {
-                    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No tienes tareas pendientes</p></div>';
-                } else {
-                    list.innerHTML = mainTasks.slice(0, 10).map(function(t) {
-                        var checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = t.isCompleted;
-                        checkbox.addEventListener('change', (function(taskId, completed) {
-                            return function() { toggleTask(taskId, completed); };
-                        })(t.id, !t.isCompleted));
-                        
-                        var item = document.createElement('div');
-                        item.className = 'task-item' + (t.isCompleted ? ' completed' : '');
-                        item.appendChild(checkbox);
-                        
-                        var span = document.createElement('span');
-                        span.textContent = t.title;
-                        item.appendChild(span);
-                        
-                        var label = document.createElement('span');
-                        label.className = 'task-subject';
-                        label.textContent = t.subject;
-                        item.appendChild(label);
-                        
-                        return item.outerHTML;
-                    }).join('');
-                    
-                    if (mainTasks.length > 10) {
-                        list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
-                    }
-                }
+                renderTasks();
             }
         } catch (e) {
             console.error('Error loading tasks:', e);
+        }
+    }
+
+    function renderTasks() {
+        var list = document.getElementById('tasksList');
+        var mainTasks = allTasks.filter(function(t) { return t.subtasks && t.subtasks.length > 0; });
+        
+        if (currentFilter === 'Pendiente') {
+            mainTasks = mainTasks.filter(function(t) { return !t.isCompleted; });
+        } else if (currentFilter === 'Completada') {
+            mainTasks = mainTasks.filter(function(t) { return t.isCompleted; });
+        }
+        
+        if (mainTasks.length === 0) {
+            list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No hay tareas</p></div>';
+            return;
+        }
+
+        list.innerHTML = mainTasks.slice(0, 10).map(function(t) {
+            var isInPlan = todayPlan.find(function(p) { return p.id === t.id; });
+            var isSelected = isInPlan ? ' selected' : '';
+            
+            var item = document.createElement('div');
+            item.className = 'task-item' + isSelected + (t.isCompleted ? ' completed' : '');
+            item.onclick = function(e) {
+                if (e.target.type !== 'checkbox') {
+                    if (isInPlan) {
+                        removeFromPlan(t.id);
+                    } else {
+                        addToPlan(t.id);
+                    }
+                }
+            };
+            
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = t.isCompleted;
+            checkbox.addEventListener('change', (function(taskId, completed) {
+                return function() { toggleTask(taskId, completed); };
+            })(t.id, !t.isCompleted));
+            item.appendChild(checkbox);
+            
+            var span = document.createElement('span');
+            span.textContent = t.title;
+            item.appendChild(span);
+            
+            var label = document.createElement('span');
+            label.className = 'task-subject';
+            label.textContent = t.subject;
+            item.appendChild(label);
+            
+            var addBtn = document.createElement('span');
+            addBtn.innerHTML = isInPlan ? '✓' : '+';
+            addBtn.style.cssText = 'font-size:18px;font-weight:bold;color:' + (isInPlan ? 'var(--secondary)' : 'var(--primary)') + ';margin-left:8px;';
+            item.appendChild(addBtn);
+            
+            return item.outerHTML;
+        }).join('');
+        
+        if (mainTasks.length > 10) {
+            list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
         }
     }
 
@@ -360,6 +408,84 @@
             }
         } catch (e) {
             showToast('Error de conexión', 'error');
+        }
+    }
+
+    // Plan Management Functions
+    function addToPlan(taskId) {
+        var task = allTasks.find(function(t) { return t.id === taskId; });
+        if (task && !todayPlan.find(function(p) { return p.id === taskId; })) {
+            todayPlan.push(task);
+            savePlan();
+            renderTodayPlan();
+            renderTasks();
+            showToast('Tarea agregada al plan ✓');
+        }
+    }
+
+    function removeFromPlan(taskId) {
+        todayPlan = todayPlan.filter(function(p) { return p.id !== taskId; });
+        savePlan();
+        renderTodayPlan();
+        renderTasks();
+    }
+
+    function savePlan() {
+        localStorage.setItem('edufocus_todayPlan', JSON.stringify(todayPlan));
+    }
+
+    function renderTodayPlan() {
+        var container = document.getElementById('todayPlanList');
+        var badge = document.getElementById('planBadge');
+        
+        badge.textContent = todayPlan.length;
+        
+        if (todayPlan.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>Agrega tareas a tu plan de hoy</p><p style="font-size: 12px; margin-top: 8px;">Selecciona tareas de "Mis Tareas" o pide ayuda al Tutor</p></div>';
+            return;
+        }
+
+        container.innerHTML = todayPlan.map(function(task, index) {
+            var isCompleted = task.isCompleted || false;
+            return '<div class="plan-item' + (isCompleted ? ' completed' : '') + '">' +
+                '<span class="plan-number">' + (index + 1) + '</span>' +
+                '<input type="checkbox" ' + (isCompleted ? 'checked' : '') + ' onchange="window.togglePlanTask(\'' + task.id + '\')">' +
+                '<span>' + task.title + '</span>' +
+                '<span class="plan-subject">' + task.subject + '</span>' +
+                '<button onclick="window.removeFromPlan(\'' + task.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>' +
+                '</div>';
+        }).join('');
+    }
+
+    function togglePlanTask(taskId) {
+        var task = todayPlan.find(function(p) { return p.id === taskId; });
+        if (task) {
+            task.isCompleted = !task.isCompleted;
+            savePlan();
+            renderTodayPlan();
+            if (task.isCompleted) {
+                showToast('¡Tarea completada! 🎉');
+            }
+        }
+    }
+
+    function startPlan() {
+        if (todayPlan.length === 0) {
+            showToast('Agrega tareas a tu plan primero', 'error');
+            return;
+        }
+        startFocus();
+        showToast('¡Plan iniciado! Focus mode activado 🍅');
+    }
+
+    function clearPlan() {
+        if (todayPlan.length === 0) return;
+        if (confirm('¿Limpiar todas las tareas del plan?')) {
+            todayPlan = [];
+            savePlan();
+            renderTodayPlan();
+            renderTasks();
+            showToast('Plan limpiado');
         }
     }
 
@@ -465,6 +591,10 @@
         document.getElementById('pomodoroDisplay').textContent = '25:00';
         showToast('Focus reiniciado');
     }
+
+    // Make functions globally accessible for inline handlers
+    window.togglePlanTask = togglePlanTask;
+    window.removeFromPlan = removeFromPlan;
 
     document.addEventListener('DOMContentLoaded', init);
 })();
