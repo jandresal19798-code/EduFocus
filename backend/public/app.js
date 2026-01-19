@@ -327,28 +327,36 @@
         list.innerHTML = mainTasks.slice(0, 10).map(function(t) {
             var isInPlan = todayPlan.find(function(p) { return p.id === t.id; });
             var isSelected = isInPlan ? ' selected' : '';
+            var checkAttr = t.isCompleted ? 'checked' : '';
+            var checkToggle = 'window.toggleTask(\\'' + t.id + '\\',' + (!t.isCompleted) + ')';
+            var icon = isInPlan ? '✓' : '+';
+            var iconColor = isInPlan ? 'var(--secondary)' : 'var(--primary)';
             
-            return '<div class="task-item' + isSelected + (t.isCompleted ? ' completed' : '') + '" onclick="window.handleTaskClick(\'' + t.id + '\')">' +
-                '<input type="checkbox" ' + (t.isCompleted ? 'checked' : '') + ' onchange="event.stopPropagation();window.toggleTask(\'' + t.id + '\',' + (!t.isCompleted) + ')">' +
+            return '<div class="task-item' + isSelected + (t.isCompleted ? ' completed' : '') + '" data-task-id="' + t.id + '">' +
+                '<input type="checkbox" ' + checkAttr + ' onchange="event.stopPropagation();' + checkToggle + '">' +
                 '<span>' + t.title + '</span>' +
                 '<span class="task-subject">' + t.subject + '</span>' +
-                '<span style="font-size:18px;font-weight:bold;color:' + (isInPlan ? 'var(--secondary)' : 'var(--primary)') + ';margin-left:8px;">' + (isInPlan ? '✓' : '+') + '</span>' +
+                '<span style="font-size:18px;font-weight:bold;color:' + iconColor + ';margin-left:8px;">' + icon + '</span>' +
                 '</div>';
         }).join('');
         
         if (mainTasks.length > 10) {
             list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
         }
-    }
 
-    window.handleTaskClick = function(taskId) {
-        var isInPlan = todayPlan.find(function(p) { return p.id === taskId; });
-        if (isInPlan) {
-            removeFromPlan(taskId);
-        } else {
-            addToPlan(taskId);
-        }
-    };
+        // Attach event listeners using delegation
+        list.querySelectorAll('.task-item').forEach(function(item) {
+            item.onclick = function() {
+                var taskId = this.dataset.taskId;
+                var isInPlan = todayPlan.find(function(p) { return p.id === taskId; });
+                if (isInPlan) {
+                    removeFromPlan(taskId);
+                } else {
+                    addToPlan(taskId);
+                }
+            };
+        });
+    }
 
     async function createTask() {
         var title = document.getElementById('taskTitle').value.trim();
@@ -463,14 +471,24 @@
 
         container.innerHTML = todayPlan.map(function(task, index) {
             var isCompleted = task.isCompleted || false;
-            return '<div class="plan-item' + (isCompleted ? ' completed' : '') + '">' +
+            var checkAttr = isCompleted ? 'checked' : '';
+            var toggleFunc = 'window.togglePlanTask(\\'' + task.id + '\\')';
+            var removeFunc = 'window.removeFromPlan(\\'' + task.id + '\\')';
+            return '<div class="plan-item' + (isCompleted ? ' completed' : '') + '" data-plan-id="' + task.id + '">' +
                 '<span class="plan-number">' + (index + 1) + '</span>' +
-                '<input type="checkbox" ' + (isCompleted ? 'checked' : '') + ' onchange="window.togglePlanTask(\'' + task.id + '\')">' +
+                '<input type="checkbox" ' + checkAttr + ' onchange="' + toggleFunc + '">' +
                 '<span>' + task.title + '</span>' +
                 '<span class="plan-subject">' + task.subject + '</span>' +
-                '<button onclick="window.removeFromPlan(\'' + task.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>' +
+                '<button data-remove="' + task.id + '" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>' +
                 '</div>';
         }).join('');
+
+        // Attach event listeners
+        container.querySelectorAll('button[data-remove]').forEach(function(btn) {
+            btn.onclick = function() {
+                window.removeFromPlan(this.dataset.remove);
+            };
+        });
     }
 
     function togglePlanTask(taskId) {
