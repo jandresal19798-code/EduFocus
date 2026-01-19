@@ -56,12 +56,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-app.get('/favicon.ico', (req, res) => {
-  res.redirect('/favicon.svg');
-});
-
 app.get('/', (req, res) => {
-  res.sendFile('index.html', { root: '.' });
+  res.sendFile('index.html', { root: 'public' });
 });
 
 app.get('/health', (req, res) => {

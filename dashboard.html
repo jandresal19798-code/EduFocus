@@ -1,595 +1,629 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduFocus - Panel de Estudio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-    .btn-primary:hover { opacity: 0.9; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFocus - Dashboard Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  
-  <!-- Login/Register Section -->
-  <div id="authSection" class="gradient-bg min-h-screen flex items-center justify-center p-4">
-    <div class="card p-8 w-full max-w-md">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-indigo-600 mb-2">📚 EduFocus</h1>
-        <p class="text-gray-600">Tu asistente de estudio inteligente</p>
-      </div>
-      
-      <div class="space-y-4">
-        <input type="email" id="loginEmail" placeholder="Email" class="w-full p-4 border rounded-lg">
-        <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full p-4 border rounded-lg">
-        <button onclick="login()" class="btn-primary w-full p-4 rounded-lg font-semibold">Iniciar Sesión</button>
-        <div class="text-center">
-          <a onclick="showRegister()" class="text-indigo-600 cursor-pointer">¿No tienes cuenta? Regístrate</a>
-        </div>
-      </div>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-6 max-w-6xl">
+        
+        <!-- Header -->
+        <header class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5 mb-6 fade-in border border-white/50">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🎓</div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">EduFocus</h1>
+                        <p class="text-sm text-gray-500">Tu asistente de aprendizaje inteligente</p>
+                    </div>
+                </div>
+                <div id="userInfo" class="hidden flex items-center gap-4">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-yellow-100 rounded-full">
+                        <span class="text-xl">🔥</span>
+                        <span id="streakDisplay" class="font-bold text-orange-600">0</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full">
+                        <span class="text-xl">⭐</span>
+                        <span id="xpDisplay" class="font-bold text-indigo-600">0 XP</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full">
+                        <span class="text-xl">📊</span>
+                        <span id="levelDisplay" class="font-bold text-green-600">Nivel 1</span>
+                    </div>
+                    <span id="userNameDisplay" class="text-gray-600 font-medium"></span>
+                    <button onclick="logout()" class="text-gray-400 hover:text-red-500 transition-colors">🚪</button>
+                </div>
+            </div>
+        </header>
 
-      <!-- Register Form (hidden by default) -->
-      <div id="registerForm" class="hidden mt-6 pt-6 border-t">
-        <h3 class="text-lg font-semibold mb-4">Crear cuenta</h3>
-        <input type="email" id="regEmail" placeholder="Email" class="w-full p-4 border rounded-lg mb-3">
-        <input type="password" id="regPassword" placeholder="Contraseña" class="w-full p-4 border rounded-lg mb-3">
-        <input type="date" id="regBirthDate" class="w-full p-4 border rounded-lg mb-3">
-        <select id="regRole" class="w-full p-4 border rounded-lg mb-4">
-          <option value="STUDENT">Estudiante</option>
-          <option value="PARENT">Padre/Tutor</option>
-        </select>
-        <button onclick="register()" class="btn-primary w-full p-4 rounded-lg font-semibold">Crear Cuenta</button>
-        <div class="text-center mt-4">
-          <a onclick="showLogin()" class="text-indigo-600 cursor-pointer">Ya tengo cuenta</a>
+        <!-- Auth Section -->
+        <section id="authSection" class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 fade-in border border-white/50">
+            <h2 class="text-xl font-semibold mb-6 text-center text-gray-700">🔐 Inicia tu sesión</h2>
+            <div class="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-xl">
+                    <h3 class="font-medium mb-4 text-indigo-700 flex items-center gap-2">
+                        <span>📝</span> Registro rápido
+                    </h3>
+                    <input type="email" id="regEmail" placeholder="Email" class="w-full p-3 border border-indigo-200 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+                    <input type="password" id="regPassword" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full p-3 border border-indigo-200 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+                    <input type="date" id="regBirthDate" class="w-full p-3 border border-indigo-200 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+                    <select id="regRole" class="w-full p-3 border border-indigo-200 rounded-lg mb-4 focus:ring-2 focus:ring-indigo-400 outline-none">
+                        <option value="STUDENT">🎒 Estudiante</option>
+                        <option value="PARENT">👨‍👩‍👧 Padre/Madre</option>
+                    </select>
+                    <button onclick="register()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium py-3 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg">Crear cuenta</button>
+                </div>
+                <div class="bg-gradient-to-br from-green-50 to-teal-50 p-5 rounded-xl">
+                    <h3 class="font-medium mb-4 text-green-700 flex items-center gap-2">
+                        <span>🔑</span> Iniciar sesión
+                    </h3>
+                    <input type="email" id="loginEmail" placeholder="Email" class="w-full p-3 border border-green-200 rounded-lg mb-3 focus:ring-2 focus:ring-green-400 outline-none">
+                    <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full p-3 border border-green-200 rounded-lg mb-4 focus:ring-2 focus:ring-green-400 outline-none">
+                    <button onclick="login()" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-medium py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all shadow-lg">Entrar</button>
+                </div>
+            </div>
+            <div id="authResult" class="mt-4 p-4 rounded-lg text-center hidden"></div>
+        </section>
+
+        <!-- Dashboard (shown after auth) -->
+        <div id="dashboard" class="hidden">
+            
+            <!-- Stats Cards -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-4 fade-in border border-white/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">Nivel</p>
+                            <p id="level" class="text-3xl font-bold text-indigo-600">1</p>
+                        </div>
+                        <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-2xl">🏆</div>
+                    </div>
+                </div>
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-4 fade-in border border-white/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">XP Total</p>
+                            <p id="xp" class="text-3xl font-bold text-yellow-500">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-2xl">⭐</div>
+                    </div>
+                </div>
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-4 fade-in border border-white/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">Racha</p>
+                            <p id="streak" class="text-3xl font-bold text-orange-500">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-2xl">🔥</div>
+                    </div>
+                </div>
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-4 fade-in border border-white/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">Tareas</p>
+                            <p id="tasksCount" class="text-3xl font-bold text-green-500">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl">📋</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Grid -->
+            <div class="grid lg:grid-cols-2 gap-6">
+                
+                <!-- Tutor IA -->
+                <section class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5 fade-in border border-white/50">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
+                        <span class="text-2xl">🤖</span> Tutor Inteligente
+                    </h2>
+                    <div id="tutorChat" class="h-72 overflow-y-auto border-2 border-indigo-100 rounded-xl p-4 mb-4 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 space-y-3">
+                        <div class="text-center text-gray-400 py-8">
+                            <div class="text-4xl mb-2">💡</div>
+                            <p>Pregúntame sobre cualquier tema:</p>
+                            <p class="text-sm">Matemáticas, Historia, Ciencias...</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="tutorInput" placeholder="Escribe tu pregunta aquí..." class="flex-1 p-3 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none" onkeypress="if(event.key==='Enter')sendTutorMessage()">
+                        <button onclick="sendTutorMessage()" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all font-medium shadow-lg">Enviar</button>
+                    </div>
+                </section>
+
+                <!-- Tasks Manager -->
+                <section class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5 fade-in border border-white/50">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
+                        <span class="text-2xl">📋</span> Mis Tareas
+                        <span id="tasksBadge" class="ml-auto bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">0</span>
+                    </h2>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="taskTitle" placeholder="Nueva tarea..." class="flex-1 p-3 border-2 border-green-200 rounded-xl focus:ring-2 focus:ring-green-400 outline-none">
+                        <select id="taskSubject" class="p-3 border-2 border-green-200 rounded-xl focus:ring-2 focus:ring-green-400 outline-none bg-white">
+                            <option value="Matemática">📐</option>
+                            <option value="Lengua Española">📝</option>
+                            <option value="Historia">📜</option>
+                            <option value="Geografia">🗺️</option>
+                            <option value="Ciencias">🔬</option>
+                            <option value="Física">⚡</option>
+                            <option value="Química">🧪</option>
+                        </select>
+                        <button onclick="createTask()" class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-5 py-3 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all font-medium shadow-lg">+</button>
+                    </div>
+                    <div id="tasksList" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        <!-- Tasks will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Focus Mode -->
+                <section class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5 fade-in border border-white/50">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
+                        <span class="text-2xl">🍅</span> Focus Mode
+                    </h2>
+                    <div class="text-center py-4">
+                        <div id="pomodoroDisplay" class="text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 font-mono">25:00</div>
+                        <div class="flex justify-center gap-3 mb-4">
+                            <button onclick="startFocus()" class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all font-medium shadow-lg">
+                                <span>▶️</span> Iniciar
+                            </button>
+                            <button onclick="pauseFocus()" class="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-yellow-600 hover:to-orange-700 transition-all font-medium shadow-lg">
+                                <span>⏸️</span> Pausar
+                            </button>
+                            <button onclick="stopFocus()" class="flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-600 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all font-medium shadow-lg">
+                                <span>⏹️</span> Detener
+                            </button>
+                        </div>
+                        <div class="flex justify-center gap-4 text-sm text-gray-500">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-500 rounded-full"></span> Focus (25 min)</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded-full"></span> Descanso (5 min)</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- API Status -->
+                <section class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5 fade-in border border-white/50">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
+                        <span class="text-2xl">🔌</span> Estado del Sistema
+                    </h2>
+                    <div id="apiStatus" class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl">
+                            <span class="flex items-center gap-2 text-gray-600">
+                                <span class="text-lg">🌐</span> API EduFocus
+                            </span>
+                            <span id="apiHealth" class="text-green-600 font-medium flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span> Verificando...
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl">
+                            <span class="flex items-center gap-2 text-gray-600">
+                                <span class="text-lg">🗄️</span> Base de Datos
+                            </span>
+                            <span id="apiDb" class="text-green-600 font-medium flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span> Verificando...
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
+                            <span class="flex items-center gap-2 text-gray-600">
+                                <span class="text-lg">🎓</span> Tutor IA
+                            </span>
+                            <span id="tutorStatus" class="text-yellow-600 font-medium flex items-center gap-1">
+                                <span class="w-2 h-2 bg-yellow-500 rounded-full pulse"></span> Sin configurar
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-xl text-center">
+                        <p class="text-xs text-gray-500">API: <span class="font-mono text-indigo-600">https://edufocus-api.onrender.com</span></p>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Progress Section -->
+            <section class="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5 fade-in border border-white/50">
+                <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
+                    <span class="text-2xl">📈</span> Tu Progreso
+                </h2>
+                <div id="progressSection" class="grid md:grid-cols-3 gap-4">
+                    <div class="text-center text-gray-500 py-8 col-span-3">
+                        <div class="text-4xl mb-2">📊</div>
+                        <p>Completa actividades para ver tu progreso</p>
+                    </div>
+                </div>
+            </section>
+
         </div>
-      </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast" class="fixed bottom-4 right-4 bg-white shadow-xl rounded-xl p-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
+            <span id="toastIcon" class="text-2xl"></span>
+            <span id="toastMessage" class="text-gray-700 font-medium"></span>
+        </div>
+
     </div>
-  </div>
 
-  <!-- Main App (hidden by default) -->
-  <div id="appSection" class="hidden">
-    <!-- Header -->
-    <header class="gradient-bg text-white p-4">
-      <div class="max-w-6xl mx-auto flex justify-between items-center">
-        <h1 class="text-2xl font-bold">📚 EduFocus</h1>
-        <div class="flex items-center gap-4">
-          <span id="userInfo" class="text-sm"></span>
-          <button onclick="logout()" class="bg-white/20 px-4 py-2 rounded-lg">Cerrar Sesión</button>
-        </div>
-      </div>
-    </header>
+    <script>
+        const API_URL = 'https://edufocus-api.onrender.com/api';
+        let token = localStorage.getItem('edufocus_token');
+        let focusInterval = null;
+        let focusTime = 25 * 60;
+        let focusRunning = false;
 
-    <!-- Navigation -->
-    <nav class="bg-white shadow p-4">
-      <div class="max-w-6xl mx-auto flex gap-4 overflow-x-auto">
-        <button onclick="showTab('dashboard')" class="tab-btn px-6 py-2 rounded-full bg-indigo-100 text-indigo-700 font-medium">📊 Dashboard</button>
-        <button onclick="showTab('tutor')" class="tab-btn px-6 py-2 rounded-full bg-gray-100 text-gray-700 font-medium">🤖 Tutor IA</button>
-        <button onclick="showTab('tasks')" class="tab-btn px-6 py-2 rounded-full bg-gray-100 text-gray-700 font-medium">📝 Tareas</button>
-        <button onclick="showTab('focus')" class="tab-btn px-6 py-2 rounded-full bg-gray-100 text-gray-700 font-medium">⏱️ Focus</button>
-      </div>
-    </nav>
-
-    <!-- Content -->
-    <main class="max-w-6xl mx-auto p-4">
-      
-      <!-- Dashboard Tab -->
-      <div id="tab-dashboard" class="tab-content">
-        <h2 class="text-2xl font-bold mb-6">📊 Tu Progreso</h2>
-        
-        <div class="grid md:grid-cols-4 gap-4 mb-6">
-          <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-indigo-600" id="statLevel">1</div>
-            <div class="text-gray-500">Nivel</div>
-          </div>
-          <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-green-600" id="statXP">0</div>
-            <div class="text-gray-500">XP Total</div>
-          </div>
-          <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-orange-500" id="statStreak">0</div>
-            <div class="text-gray-500">Días Racha</div>
-          </div>
-          <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-purple-600" id="statTasks">0</div>
-            <div class="text-gray-500">Tareas</div>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-6">
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold mb-4">🎯 Tareas Pendientes</h3>
-            <div id="taskList" class="space-y-3">
-              <p class="text-gray-500">No hay tareas pendientes</p>
-            </div>
-          </div>
-          
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold mb-4">📈 Materias</h3>
-            <div id="subjectList" class="space-y-3">
-              <p class="text-gray-500">Sin datos aún</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tutor Tab -->
-      <div id="tab-tutor" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6">🤖 Tutor Inteligente</h2>
-        
-        <div class="card p-6 mb-4">
-          <div class="flex gap-2 mb-4 overflow-x-auto">
-            <button onclick="setTutorSubject('Matemáticas')" class="tutor-subject-btn px-4 py-2 rounded-full bg-indigo-100 text-indigo-700">Matemáticas</button>
-            <button onclick="setTutorSubject('Física')" class="tutor-subject-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700">Física</button>
-            <button onclick="setTutorSubject('Química')" class="tutor-subject-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700">Química</button>
-            <button onclick="setTutorSubject('Historia')" class="tutor-subject-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700">Historia</button>
-          </div>
-          
-          <div id="chatMessages" class="h-80 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50">
-            <div class="mb-4">
-              <div class="bg-indigo-100 p-3 rounded-lg inline-block max-w-[80%]">
-                <p class="text-indigo-800">¡Hola! Soy tu tutor inteligente. 🎓</p>
-                <p class="text-indigo-600 text-sm mt-1">Pregúntame sobre cualquier tema y te ayudaré a entenderlo paso a paso.</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="flex gap-2">
-            <input type="text" id="tutorInput" placeholder="Escribe tu pregunta..." class="flex-1 p-4 border rounded-lg">
-            <button onclick="sendToTutor()" class="btn-primary px-6 rounded-lg">Enviar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tasks Tab -->
-      <div id="tab-tasks" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6">📝 Gestión de Tareas</h2>
-        
-        <div class="card p-6 mb-6">
-          <h3 class="text-lg font-semibold mb-4">Agregar Tarea</h3>
-          <div class="grid md:grid-cols-4 gap-4">
-            <input type="text" id="taskTitle" placeholder="Título" class="p-3 border rounded-lg">
-            <input type="text" id="taskSubject" placeholder="Materia" class="p-3 border rounded-lg">
-            <input type="number" id="taskDuration" placeholder="Minutos" value="30" class="p-3 border rounded-lg">
-            <button onclick="createTask()" class="btn-primary p-3 rounded-lg">Agregar</button>
-          </div>
-        </div>
-
-        <div class="card p-6">
-          <h3 class="text-lg font-semibold mb-4">Mis Tareas</h3>
-          <div id="allTasksList" class="space-y-3">
-            <p class="text-gray-500">No hay tareas aún</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Focus Tab -->
-      <div id="tab-focus" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6">⏱️ Modo Focus</h2>
-        
-        <div class="max-w-md mx-auto card p-8 text-center">
-          <div id="pomodoroTimer" class="text-7xl font-bold text-indigo-600 mb-4">25:00</div>
-          <div class="text-gray-500 mb-6" id="pomodoroStatus">Listo para comenzar</div>
-          
-          <div class="flex gap-4 justify-center">
-            <button onclick="startFocus()" id="btnStartFocus" class="btn-primary px-8 py-3 rounded-lg font-semibold">Iniciar</button>
-            <button onclick="stopFocus()" class="bg-gray-200 px-8 py-3 rounded-lg font-semibold">Detener</button>
-          </div>
-          
-          <div class="mt-8 grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div class="text-2xl font-bold text-green-600" id="todayFocus">0</div>
-              <div class="text-sm text-gray-500">Minutos Hoy</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-orange-500" id="todaySessions">0</div>
-              <div class="text-sm text-gray-500">Sesiones</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-purple-600" id="weekStreak">0</div>
-              <div class="text-sm text-gray-500">Días Racha</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
-  </div>
-
-  <!-- Results -->
-  <div class="fixed bottom-4 right-4 max-w-sm" id="notifications"></div>
-
-  <script>
-    const API_URL = 'https://edufocus-api.onrender.com/api';
-    let token = localStorage.getItem('token');
-    let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
-    let tutorSubject = 'Matemáticas';
-    let focusTime = 25 * 60;
-    let focusInterval = null;
-
-    // Initialize
-    if (token) {
-      showApp();
-      loadDashboard();
-    }
-
-    function showRegister() {
-      document.getElementById('registerForm').classList.remove('hidden');
-    }
-
-    function showLogin() {
-      document.getElementById('registerForm').classList.add('hidden');
-    }
-
-    async function register() {
-      const email = document.getElementById('regEmail').value;
-      const password = document.getElementById('regPassword').value;
-      const birthDate = document.getElementById('regBirthDate').value;
-      const role = document.getElementById('regRole').value;
-
-      if (!email || !password || !birthDate) {
-        showNotification('Completa todos los campos', 'error');
-        return;
-      }
-
-      try {
-        const res = await fetch(API_URL + '/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, birthDate, role })
+        document.addEventListener('DOMContentLoaded', () => {
+            checkApiStatus();
+            if (token) {
+                loadUserProfile();
+            }
         });
-        const data = await res.json();
-        
-        if (res.ok) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          token = data.token;
-          currentUser = data.user;
-          showApp();
-          showNotification('¡Cuenta creada exitosamente! 🎉', 'success');
-        } else {
-          showNotification(data.error || 'Error al registrar', 'error');
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+            
+            toast.className = 'fixed bottom-4 right-4 bg-white shadow-xl rounded-xl p-4 transform transition-all duration-300 z-50 flex items-center gap-3 border-l-4';
+            toast.classList.add(type === 'success' ? 'border-green-500' : 'border-red-500');
+            icon.textContent = type === 'success' ? '✅' : '❌';
+            msg.textContent = message;
+            
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.transform = 'translate-y-20 opacity-0';
+            }, 3000);
         }
-      } catch (error) {
-        showNotification('Error de conexión', 'error');
-      }
-    }
 
-    async function login() {
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      try {
-        const res = await fetch(API_URL + '/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        
-        if (res.ok) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          token = data.token;
-          currentUser = data.user;
-          showApp();
-          loadDashboard();
-          showNotification('¡Bienvenido de vuelta! 👋', 'success');
-        } else {
-          showNotification(data.error || 'Credenciales inválidas', 'error');
+        async function checkApiStatus() {
+            try {
+                const res = await fetch(`${API_URL}/health`);
+                const data = await res.json();
+                document.getElementById('apiHealth').innerHTML = data.status === 'ok' 
+                    ? '<span class="w-2 h-2 bg-green-500 rounded-full pulse"></span> Conectado' 
+                    : '<span class="w-2 h-2 bg-red-500 rounded-full pulse"></span> Error';
+                document.getElementById('apiDb').innerHTML = data.database === 'connected' 
+                    ? '<span class="w-2 h-2 bg-green-500 rounded-full pulse"></span> Conectada' 
+                    : '<span class="w-2 h-2 bg-yellow-500 rounded-full pulse"></span> Desconectada';
+            } catch (e) {
+                document.getElementById('apiHealth').innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full pulse"></span> Error';
+                document.getElementById('apiDb').innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full pulse"></span> Error';
+            }
         }
-      } catch (error) {
-        showNotification('Error de conexión', 'error');
-      }
-    }
 
-    function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      token = null;
-      currentUser = null;
-      document.getElementById('appSection').classList.add('hidden');
-      document.getElementById('authSection').classList.remove('hidden');
-    }
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const birthDate = document.getElementById('regBirthDate').value;
+            const role = document.getElementById('regRole').value;
 
-    function showApp() {
-      document.getElementById('authSection').classList.add('hidden');
-      document.getElementById('appSection').classList.remove('hidden');
-      document.getElementById('userInfo').textContent = currentUser?.email || 'Usuario';
-    }
+            if (!email || !password || !birthDate) {
+                showToast('Por favor completa todos los campos', 'error');
+                return;
+            }
 
-    function showTab(tab) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById('tab-' + tab).classList.remove('hidden');
-      
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-indigo-100', 'text-indigo-700');
-        btn.classList.add('bg-gray-100', 'text-gray-700');
-      });
-      event.target.classList.remove('bg-gray-100', 'text-gray-700');
-      event.target.classList.add('bg-indigo-100', 'text-indigo-700');
+            if (password.length < 6) {
+                showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
 
-      if (tab === 'dashboard') loadDashboard();
-    }
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, birthDate, role })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.token;
+                    localStorage.setItem('edufocus_token', token);
+                    showToast('¡Cuenta creada exitosamente!');
+                    loadUserProfile();
+                } else {
+                    showToast(data.error || 'Error al registrar', 'error');
+                }
+            } catch (e) {
+                showToast('Error de conexión', 'error');
+            }
+        }
 
-    async function loadDashboard() {
-      if (!token) return;
-      
-      try {
-        const res = await fetch(API_URL + '/users/stats', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
-        
-        if (res.ok) {
-          document.getElementById('statLevel').textContent = data.gamification?.level || 1;
-          document.getElementById('statXP').textContent = data.gamification?.currentXP || 0;
-          document.getElementById('statStreak').textContent = data.gamification?.streak || 0;
-          document.getElementById('statTasks').textContent = data.tasksCompleted || 0;
-          document.getElementById('todayFocus').textContent = Math.round((data.totalMinutesThisMonth || 0) / 60);
-          document.getElementById('todaySessions').textContent = data.weekSessions || 0;
-          document.getElementById('weekStreak').textContent = data.gamification?.streak || 0;
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
-          // Load subjects
-          const subjectList = document.getElementById('subjectList');
-          if (data.subjectsMastery?.length > 0) {
-            subjectList.innerHTML = data.subjectsMastery.map(s => `
-              <div class="flex justify-between items-center">
-                <span>${s.subject}</span>
-                <div class="flex items-center gap-2">
-                  <div class="w-24 bg-gray-200 rounded-full h-2">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: ${s.avgMastery}%"></div>
-                  </div>
-                  <span class="text-sm text-gray-500">${s.avgMastery}%</span>
+            if (!email || !password) {
+                showToast('Email y contraseña requeridos', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.token;
+                    localStorage.setItem('edufocus_token', token);
+                    showToast('¡Bienvenido de nuevo!');
+                    loadUserProfile();
+                } else {
+                    showToast(data.error || 'Credenciales inválidas', 'error');
+                }
+            } catch (e) {
+                showToast('Error de conexión', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('edufocus_token');
+            token = null;
+            location.reload();
+        }
+
+        async function loadUserProfile() {
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${API_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    document.getElementById('userInfo').classList.add('flex');
+                    
+                    const displayName = data.profile?.displayName || data.user?.email.split('@')[0];
+                    document.getElementById('userNameDisplay').textContent = displayName;
+                    document.getElementById('userNameDisplay').classList.add('text-gray-700', 'font-medium');
+                    
+                    updateStats(data.profile);
+                    loadTasks();
+                } else {
+                    localStorage.removeItem('edufocus_token');
+                    token = null;
+                }
+            } catch (e) {
+                console.error('Error loading profile:', e);
+            }
+        }
+
+        function updateStats(profile) {
+            if (!profile) return;
+            document.getElementById('level').textContent = profile.level || 1;
+            document.getElementById('xp').textContent = profile.totalXP || 0;
+            document.getElementById('streak').textContent = profile.currentStreak || 0;
+            
+            document.getElementById('levelDisplay').textContent = `Nivel ${profile.level || 1}`;
+            document.getElementById('xpDisplay').textContent = `${profile.totalXP || 0} XP`;
+            document.getElementById('streakDisplay').textContent = profile.currentStreak || 0;
+        }
+
+        async function loadTasks() {
+            try {
+                const res = await fetch(`${API_URL}/tasks`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    const tasks = data.tasks || [];
+                    document.getElementById('tasksCount').textContent = tasks.length;
+                    document.getElementById('tasksBadge').textContent = tasks.length;
+                    
+                    const list = document.getElementById('tasksList');
+                    if (tasks.length === 0) {
+                        list.innerHTML = `
+                            <div class="text-center text-gray-400 py-6">
+                                <div class="text-3xl mb-2">📝</div>
+                                <p class="text-sm">No tienes tareas pendientes</p>
+                                <p class="text-xs">¡Agrega una tarea para comenzar!</p>
+                            </div>
+                        `;
+                    } else {
+                        list.innerHTML = tasks.map(t => `
+                            <div class="flex items-center gap-3 p-3 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100 slide-in hover:shadow-md transition-shadow">
+                                <input type="checkbox" ${t.isCompleted ? 'checked' : ''} 
+                                    onchange="toggleTask('${t.id}', ${!t.isCompleted})"
+                                    class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-gray-700 truncate ${t.isCompleted ? 'line-through text-gray-400' : ''}">${t.title}</p>
+                                    <p class="text-xs text-gray-400">${t.subject} • ${t.estimatedMinutes} min</p>
+                                </div>
+                                <span class="text-sm px-2 py-1 rounded-full ${getDifficultyColor(t.difficulty)}">${getDifficultyText(t.difficulty)}</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading tasks:', e);
+            }
+        }
+
+        function getDifficultyColor(difficulty) {
+            if (difficulty <= 2) return 'bg-green-100 text-green-700';
+            if (difficulty <= 3) return 'bg-yellow-100 text-yellow-700';
+            return 'bg-red-100 text-red-700';
+        }
+
+        function getDifficultyText(difficulty) {
+            if (difficulty <= 2) return 'Fácil';
+            if (difficulty <= 3) return 'Medio';
+            return 'Difícil';
+        }
+
+        async function createTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const subject = document.getElementById('taskSubject').value;
+
+            if (!title) {
+                showToast('Escribe el título de la tarea', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/tasks`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        subject,
+                        description: 'Tarea creada desde dashboard',
+                        estimatedMinutes: 30,
+                        difficulty: 3
+                    })
+                });
+
+                if (res.ok) {
+                    document.getElementById('taskTitle').value = '';
+                    showToast('¡Tarea agregada!');
+                    loadTasks();
+                } else {
+                    showToast('Error al crear tarea', 'error');
+                }
+            } catch (e) {
+                showToast('Error de conexión', 'error');
+            }
+        }
+
+        async function toggleTask(id, completed) {
+            try {
+                await fetch(`${API_URL}/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isCompleted: completed })
+                });
+                loadTasks();
+                if (completed) showToast('¡Tarea completada! 🎉');
+            } catch (e) {
+                console.error('Error toggling task:', e);
+            }
+        }
+
+        async function sendTutorMessage() {
+            const input = document.getElementById('tutorInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chat = document.getElementById('tutorChat');
+            
+            chat.innerHTML += `
+                <div class="flex justify-end slide-in">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm max-w-xs">
+                        ${message}
+                    </div>
                 </div>
-              </div>
-            `).join('');
-          }
+            `;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+            document.getElementById('tutorStatus').innerHTML = '<span class="w-2 h-2 bg-purple-500 rounded-full pulse"></span> Respondiendo...';
 
-          // Load tasks
-          const tasksRes = await fetch(API_URL + '/tasks?status=pending', {
-            headers: { 'Authorization': 'Bearer ' + token }
-          });
-          const tasksData = await tasksRes.json();
-          
-          const taskList = document.getElementById('taskList');
-          if (tasksData.tasks?.length > 0) {
-            taskList.innerHTML = tasksData.tasks.slice(0, 5).map(t => `
-              <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <div class="font-medium">${t.title}</div>
-                  <div class="text-sm text-gray-500">${t.subject} • ${t.estimatedMinutes}min</div>
-                </div>
-                <span class="px-3 py-1 rounded-full text-xs ${t.difficulty >= 4 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-                  ${t.difficulty >= 4 ? 'Difícil' : 'Fácil'}
-                </span>
-              </div>
-            `).join('');
-          } else {
-            taskList.innerHTML = '<p class="text-gray-500 text-center py-4">🎉 ¡Sin tareas pendientes!</p>';
-          }
+            try {
+                const res = await fetch(`${API_URL}/tutor/conversations`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        subject: 'General',
+                        topic: 'Ayuda',
+                        initialMessage: message
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    chat.innerHTML += `
+                        <div class="flex justify-start slide-in">
+                            <div class="bg-white border-2 border-indigo-100 text-gray-700 px-4 py-2 rounded-2 rounded-tl-sm max-w-xs shadow-sm">
+                                ${data.tutorResponse}
+                            </div>
+                        </div>
+                        <div class="text-left text-xs text-indigo-400 mt-1 ml-2 mb-3">💡 ${data.nextQuestion}</div>
+                    `;
+                    document.getElementById('tutorStatus').innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full pulse"></span> Activo';
+                } else {
+                    chat.innerHTML += `
+                        <div class="flex justify-start slide-in">
+                            <div class="bg-red-50 text-red-600 px-4 py-2 rounded-2xl rounded-tl-sm max-w-xs">
+                                ${data.error || 'No se pudo procesar tu pregunta'}
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('tutorStatus').innerHTML = '<span class="w-2 h-2 bg-yellow-500 rounded-full pulse"></span> Sin configurar';
+                }
+            } catch (e) {
+                chat.innerHTML += `
+                    <div class="flex justify-start slide-in">
+                        <div class="bg-red-50 text-red-600 px-4 py-2 rounded-2xl rounded-tl-sm max-w-xs">
+                            Error de conexión. Intenta de nuevo.
+                        </div>
+                    </div>
+                `;
+            }
+            chat.scrollTop = chat.scrollHeight;
         }
-      } catch (error) {
-        console.error('Error loading dashboard:', error);
-      }
-    }
 
-    function setTutorSubject(subject) {
-      tutorSubject = subject;
-      document.querySelectorAll('.tutor-subject-btn').forEach(btn => {
-        if (btn.textContent === subject) {
-          btn.classList.remove('bg-gray-100', 'text-gray-700');
-          btn.classList.add('bg-indigo-100', 'text-indigo-700');
-        } else {
-          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
-          btn.classList.add('bg-gray-100', 'text-gray-700');
+        function startFocus() {
+            if (focusRunning) return;
+            focusRunning = true;
+            
+            if (focusInterval) clearInterval(focusInterval);
+            focusInterval = setInterval(() => {
+                focusTime--;
+                const min = Math.floor(focusTime / 60);
+                const sec = focusTime % 60;
+                document.getElementById('pomodoroDisplay').textContent = 
+                    `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+                
+                if (focusTime <= 0) {
+                    clearInterval(focusInterval);
+                    focusRunning = false;
+                    showToast('¡Tiempo completado! Descansa 5 minutos 🍅');
+                    focusTime = 25 * 60;
+                    document.getElementById('pomodoroDisplay').textContent = '25:00';
+                }
+            }, 1000);
+            showToast('¡Focusstarted! 🎯');
         }
-      });
-    }
 
-    async function sendToTutor() {
-      const input = document.getElementById('tutorInput');
-      const message = input.value.trim();
-      if (!message) return;
-
-      const chatMessages = document.getElementById('chatMessages');
-      
-      // Add user message
-      chatMessages.innerHTML += `
-        <div class="flex justify-end mb-4">
-          <div class="bg-indigo-600 text-white p-3 rounded-lg inline-block max-w-[80%]">
-            ${message}
-          </div>
-        </div>
-      `;
-
-      input.value = '';
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
-      // Show typing indicator
-      chatMessages.innerHTML += `
-        <div id="typingIndicator" class="mb-4">
-          <div class="bg-gray-200 p-3 rounded-lg inline-block">
-            <span class="text-gray-500">Escribiendo...</span>
-          </div>
-        </div>
-      `;
-
-      try {
-        const res = await fetch(API_URL + '/tutor/conversations', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({
-            subject: tutorSubject,
-            topic: message.substring(0, 50),
-            initialMessage: message
-          })
-        });
-        const data = await res.json();
-
-        document.getElementById('typingIndicator').remove();
-
-        chatMessages.innerHTML += `
-          <div class="mb-4">
-            <div class="bg-indigo-100 p-3 rounded-lg inline-block max-w-[80%]">
-              <p class="text-indigo-800">${data.tutorResponse}</p>
-              <p class="text-indigo-600 text-sm mt-1">💡 ${data.nextQuestion}</p>
-            </div>
-          </div>
-        `;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      } catch (error) {
-        document.getElementById('typingIndicator').remove();
-        chatMessages.innerHTML += `
-          <div class="mb-4">
-            <div class="bg-red-100 p-3 rounded-lg inline-block max-w-[80%]">
-              <p class="text-red-800">Error de conexión. Intenta de nuevo.</p>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    async function createTask() {
-      const title = document.getElementById('taskTitle').value;
-      const subject = document.getElementById('taskSubject').value;
-      const estimatedMinutes = document.getElementById('taskDuration').value;
-
-      if (!title || !subject) {
-        showNotification('Completa título y materia', 'error');
-        return;
-      }
-
-      try {
-        const res = await fetch(API_URL + '/tasks', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ title, subject, estimatedMinutes: parseInt(estimatedMinutes) })
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-          showNotification('¡Tarea agregada! ✅', 'success');
-          document.getElementById('taskTitle').value = '';
-          document.getElementById('taskSubject').value = '';
-          loadTasksList();
-        } else {
-          showNotification(data.error || 'Error al crear tarea', 'error');
+        function pauseFocus() {
+            if (focusInterval) {
+                clearInterval(focusInterval);
+                focusInterval = null;
+                focusRunning = false;
+            }
+            showToast('Focus pausado');
         }
-      } catch (error) {
-        showNotification('Error de conexión', 'error');
-      }
-    }
 
-    async function loadTasksList() {
-      if (!token) return;
-      
-      try {
-        const res = await fetch(API_URL + '/tasks', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
-        
-        const list = document.getElementById('allTasksList');
-        if (data.tasks?.length > 0) {
-          list.innerHTML = data.tasks.map(t => `
-            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-              <div class="flex items-center gap-3">
-                <input type="checkbox" ${t.isCompleted ? 'checked' : ''} onchange="toggleTask('${t.id}', ${!t.isCompleted})" class="w-5 h-5">
-                <div>
-                  <div class="font-medium ${t.isCompleted ? 'line-through text-gray-400' : ''}">${t.title}</div>
-                  <div class="text-sm text-gray-500">${t.subject} • ${t.estimatedMinutes}min</div>
-                </div>
-              </div>
-              <span class="px-2 py-1 rounded text-xs ${t.difficulty >= 4 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-                ${t.difficulty >= 4 ? 'Difícil' : 'Fácil'}
-              </span>
-            </div>
-          `).join('');
-        } else {
-          list.innerHTML = '<p class="text-gray-500 text-center py-4">No hay tareas aún</p>';
+        function stopFocus() {
+            if (focusInterval) clearInterval(focusInterval);
+            focusTime = 25 * 60;
+            focusRunning = false;
+            document.getElementById('pomodoroDisplay').textContent = '25:00';
+            showToast('Focus reiniciado');
         }
-      } catch (error) {
-        console.error('Error loading tasks:', error);
-      }
-    }
-
-    async function toggleTask(id, completed) {
-      if (!token) return;
-      
-      try {
-        await fetch(API_URL + '/tasks/' + id, {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ isCompleted: completed })
-        });
-        loadTasksList();
-        loadDashboard();
-      } catch (error) {
-        console.error('Error toggling task:', error);
-      }
-    }
-
-    function startFocus() {
-      focusTime = 25 * 60;
-      document.getElementById('pomodoroStatus').textContent = '🎯 En sesión de enfoque';
-      document.getElementById('btnStartFocus').disabled = true;
-      
-      focusInterval = setInterval(() => {
-        focusTime--;
-        const mins = Math.floor(focusTime / 60);
-        const secs = focusTime % 60;
-        document.getElementById('pomodoroTimer').textContent = 
-          `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        
-        if (focusTime <= 0) {
-          stopFocus();
-          showNotification('¡Sesión completada! 🎉', 'success');
-          document.getElementById('pomodoroTimer').textContent = '25:00';
-        }
-      }, 1000);
-    }
-
-    function stopFocus() {
-      clearInterval(focusInterval);
-      focusInterval = null;
-      document.getElementById('pomodoroStatus').textContent = 'Pausado';
-      document.getElementById('btnStartFocus').disabled = false;
-    }
-
-    function showNotification(message, type = 'info') {
-      const div = document.createElement('div');
-      div.className = `p-4 rounded-lg shadow-lg mb-2 ${type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500'} text-white`;
-      div.textContent = message;
-      document.getElementById('notifications').appendChild(div);
-      setTimeout(() => div.remove(), 3000);
-    }
-
-    // Load tasks when tasks tab is shown
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.target.id === 'tab-tasks' && !mutation.target.classList.contains('hidden')) {
-          loadTasksList();
-        }
-      });
-    });
-
-    document.querySelectorAll('.tab-content').forEach(tab => {
-      observer.observe(tab, { attributes: true, attributeFilter: ['class'] });
-    });
-  </script>
+    </script>
 </body>
 </html>
