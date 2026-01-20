@@ -57,11 +57,11 @@ router.post('/register', async (req, res, next) => {
         parentalConsent: age < 13 ? parentalConsent === true : true,
         parentId: role === 'STUDENT' ? parentId : null
       }
-    }).catch(function(err) {
-      console.error('Error creating user:', err);
-      throw new AppError('Error al crear el usuario: ' + err.message, 500);
     });
 
+    // Try to create profile, but don't fail if it doesn't work
+    var displayName = email.split('@')[0];
+    
     try {
       if (role === 'STUDENT') {
         const determinedAgeGroup = age < 13 ? 'CHILD' : 'TEENAGER';
@@ -69,7 +69,7 @@ router.post('/register', async (req, res, next) => {
           data: {
             userId: user.id,
             ageGroup: ageGroup || determinedAgeGroup,
-            displayName: email.split('@')[0],
+            displayName: displayName,
             preferences: {
               theme: 'system',
               pomodoroDuration: 25,
@@ -77,19 +77,18 @@ router.post('/register', async (req, res, next) => {
             }
           }
         });
+        console.log('Student profile created for user:', user.id);
       } else if (role === 'PARENT') {
         await prisma.parentProfile.create({
           data: {
             userId: user.id,
-            displayName: email.split('@')[0]
+            displayName: displayName
           }
         });
+        console.log('Parent profile created for user:', user.id);
       }
     } catch (profileErr) {
-      // Rollback user creation if profile fails
-      await prisma.user.delete({ where: { id: user.id } }).catch(function() {});
-      console.error('Error creating profile:', profileErr);
-      throw new AppError('Error al crear el perfil: ' + profileErr.message, 500);
+      console.warn('Could not create profile, continuing anyway:', profileErr.message);
     }
 
     const token = generateToken(user);
