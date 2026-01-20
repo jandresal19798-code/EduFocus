@@ -6,12 +6,19 @@ const router = Router();
 
 router.get('/profile', async (req, res, next) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'Usuario no autorizado' });
+    }
+
     const profile = await prisma.studentProfile.findUnique({
       where: { userId: req.user.id },
       include: {
         badges: true,
         user: { select: { email: true } }
       }
+    }).catch(function(err) {
+      console.error('Error finding student profile:', err);
+      return null;
     });
 
     if (!profile) {
@@ -20,12 +27,31 @@ router.get('/profile', async (req, res, next) => {
         include: {
           user: { select: { email: true } }
         }
+      }).catch(function(err) {
+        console.error('Error finding parent profile:', err);
+        return null;
       });
+
+      if (!parentProfile) {
+        // Return basic info even without profile
+        return res.json({ 
+          profile: {
+            displayName: req.user.email ? req.user.email.split('@')[0] : 'Usuario',
+            userId: req.user.id,
+            ageGroup: 'TEENAGER',
+            totalXP: 0,
+            level: 1,
+            currentStreak: 0
+          }, 
+          role: req.user.role || 'STUDENT'
+        });
+      }
       return res.json({ profile: parentProfile, role: 'PARENT' });
     }
 
     res.json({ profile, role: 'STUDENT' });
   } catch (error) {
+    console.error('Profile error:', error);
     next(error);
   }
 });

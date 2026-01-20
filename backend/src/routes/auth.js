@@ -146,10 +146,15 @@ router.post('/login', async (req, res, next) => {
     const token = generateToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    await prisma.studentProfile.update({
-      where: { userId: user.id },
-      data: { lastActiveAt: new Date() }
-    }).catch(() => {});
+    // Only update student profile, not parent
+    if (user.role === 'STUDENT') {
+      await prisma.studentProfile.update({
+        where: { userId: user.id },
+        data: { lastActiveAt: new Date() }
+      }).catch(function(err) {
+        console.error('Error updating lastActiveAt:', err);
+      });
+    }
 
     res.json({
       message: 'Login exitoso',
