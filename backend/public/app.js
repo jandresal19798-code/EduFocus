@@ -111,6 +111,51 @@
                 }
             }
         });
+        
+        // Global event delegation for dynamic content (bypasses CSP)
+        document.addEventListener('click', function(e) {
+            // Task item click - add/remove from plan
+            var taskItem = e.target.closest('.task-item[data-task-id]');
+            if (taskItem && !e.target.classList.contains('task-checkbox')) {
+                var taskId = taskItem.dataset.taskId;
+                var isInPlan = todayPlan.find(function(p) { return p.id === taskId; });
+                if (isInPlan) {
+                    removeFromPlan(taskId);
+                } else {
+                    addToPlan(taskId);
+                }
+                return;
+            }
+            
+            // Plan item remove button
+            var planRemove = e.target.closest('.plan-remove[data-plan-remove]');
+            if (planRemove) {
+                removeFromPlan(planRemove.dataset.planRemove);
+                return;
+            }
+        });
+        
+        // Checkbox event delegation
+        document.addEventListener('change', function(e) {
+            // Task checkbox - toggle completion
+            if (e.target.classList.contains('task-checkbox')) {
+                var toggleId = e.target.dataset.taskToggle;
+                var newState = e.target.dataset.taskNewState === 'true';
+                if (toggleId) {
+                    toggleTask(toggleId, newState);
+                }
+                return;
+            }
+            
+            // Plan checkbox - toggle plan task completion
+            if (e.target.classList.contains('plan-checkbox')) {
+                var planToggleId = e.target.dataset.planToggle;
+                if (planToggleId) {
+                    window.togglePlanTask(planToggleId);
+                }
+                return;
+            }
+        });
     }
 
     function showToast(message, type) {
@@ -353,13 +398,13 @@
         list.innerHTML = mainTasks.slice(0, 10).map(function(t) {
             var isInPlan = todayPlan.find(function(p) { return p.id === t.id; });
             var isSelected = isInPlan ? ' selected' : '';
-            var checkAttr = t.isCompleted ? 'checked' : '';
-            var checkToggle = "window.toggleTask('" + t.id + "'," + (!t.isCompleted) + ")";
+            var isCompleted = t.isCompleted ? ' completed' : '';
+            var isChecked = t.isCompleted ? 'checked' : '';
             var icon = isInPlan ? '✓' : '+';
             var iconColor = isInPlan ? 'var(--secondary)' : 'var(--primary)';
             
-            return '<div class="task-item' + isSelected + (t.isCompleted ? ' completed' : '') + '" data-task-id="' + t.id + '">' +
-                '<input type="checkbox" ' + checkAttr + ' onchange="event.stopPropagation();' + checkToggle + '">' +
+            return '<div class="task-item' + isSelected + isCompleted + '" data-task-id="' + t.id + '" data-task-completed="' + t.isCompleted + '">' +
+                '<input type="checkbox" class="task-checkbox" data-task-toggle="' + t.id + '" data-task-new-state="' + (!t.isCompleted) + '" ' + isChecked + '>' +
                 '<span>' + t.title + '</span>' +
                 '<span class="task-subject">' + t.subject + '</span>' +
                 '<span style="font-size:18px;font-weight:bold;color:' + iconColor + ';margin-left:8px;">' + icon + '</span>' +
@@ -369,10 +414,7 @@
         if (mainTasks.length > 10) {
             list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
         }
-
-        // Attach event listeners using delegation
-        list.querySelectorAll('.task-item').forEach(function(item) {
-            item.onclick = function() {
+    }
                 var taskId = this.dataset.taskId;
                 var isInPlan = todayPlan.find(function(p) { return p.id === taskId; });
                 if (isInPlan) {
@@ -384,7 +426,29 @@
         });
     }
 
-    async function createTask() {
+    function renderTodayPlan() {
+        var container = document.getElementById('todayPlanList');
+        var badge = document.getElementById('planBadge');
+        
+        badge.textContent = todayPlan.length;
+        
+        if (todayPlan.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>Agrega tareas a tu plan de hoy</p><p style="font-size: 12px; margin-top: 8px;">Selecciona tareas de "Mis Tareas" o pide ayuda al Tutor</p></div>';
+            return;
+        }
+
+        container.innerHTML = todayPlan.map(function(task, index) {
+            var isCompleted = task.isCompleted || false;
+            var isChecked = isCompleted ? 'checked' : '';
+            return '<div class="plan-item' + (isCompleted ? ' completed' : '') + '" data-plan-id="' + task.id + '" data-plan-completed="' + isCompleted + '">' +
+                '<span class="plan-number">' + (index + 1) + '</span>' +
+                '<input type="checkbox" class="plan-checkbox" data-plan-toggle="' + task.id + '" data-plan-new-state="' + (!isCompleted) + '" ' + isChecked + '>' +
+                '<span>' + task.title + '</span>' +
+                '<span class="plan-subject">' + task.subject + '</span>' +
+                '<button class="plan-remove" data-plan-remove="' + task.id + '" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>' +
+                '</div>';
+        }).join('');
+    }
         var title = document.getElementById('taskTitle').value.trim();
         var subject = document.getElementById('taskSubject').value;
 
@@ -498,23 +562,15 @@
         container.innerHTML = todayPlan.map(function(task, index) {
             var isCompleted = task.isCompleted || false;
             var checkAttr = isCompleted ? 'checked' : '';
-            var toggleFunc = "window.togglePlanTask('" + task.id + "')";
-            var removeFunc = "window.removeFromPlan('" + task.id + "')";
+            var newState = !isCompleted;
             return '<div class="plan-item' + (isCompleted ? ' completed' : '') + '" data-plan-id="' + task.id + '">' +
                 '<span class="plan-number">' + (index + 1) + '</span>' +
-                '<input type="checkbox" ' + checkAttr + ' onchange="' + toggleFunc + '">' +
+                '<input type="checkbox" class="plan-checkbox" data-plan-toggle="' + task.id + '" data-plan-new-state="' + newState + '" ' + checkAttr + '>' +
                 '<span>' + task.title + '</span>' +
                 '<span class="plan-subject">' + task.subject + '</span>' +
-                '<button data-remove="' + task.id + '" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>' +
+                '<button class="plan-remove" data-plan-remove="' + task.id + '" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>' +
                 '</div>';
         }).join('');
-
-        // Attach event listeners
-        container.querySelectorAll('button[data-remove]').forEach(function(btn) {
-            btn.onclick = function() {
-                window.removeFromPlan(this.dataset.remove);
-            };
-        });
     }
 
     function togglePlanTask(taskId) {
