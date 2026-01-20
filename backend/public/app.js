@@ -439,6 +439,8 @@
                 '</div>';
         }).join('');
     }
+
+    async function createTask() {
         var title = document.getElementById('taskTitle').value.trim();
         var subject = document.getElementById('taskSubject').value;
 
