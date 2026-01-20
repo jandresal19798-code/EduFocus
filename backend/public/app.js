@@ -214,7 +214,12 @@
                 showToast('¡Cuenta creada exitosamente!');
                 loadUserProfile();
             } else {
-                showToast(data.error || 'Error al registrar', 'error');
+                console.error('Register error:', data);
+                var errorMsg = data.error || data.message || 'Error al registrar';
+                if (data.hint) {
+                    errorMsg += ': ' + data.hint;
+                }
+                showToast(errorMsg, 'error');
             }
         } catch (e) {
             showToast('Error de conexión', 'error');

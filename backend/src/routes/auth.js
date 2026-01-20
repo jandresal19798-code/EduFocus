@@ -57,29 +57,39 @@ router.post('/register', async (req, res, next) => {
         parentalConsent: age < 13 ? parentalConsent === true : true,
         parentId: role === 'STUDENT' ? parentId : null
       }
+    }).catch(function(err) {
+      console.error('Error creating user:', err);
+      throw new AppError('Error al crear el usuario: ' + err.message, 500);
     });
 
-    if (role === 'STUDENT') {
-      const determinedAgeGroup = age < 13 ? 'CHILD' : 'TEENAGER';
-      await prisma.studentProfile.create({
-        data: {
-          userId: user.id,
-          ageGroup: ageGroup || determinedAgeGroup,
-          displayName: email.split('@')[0],
-          preferences: {
-            theme: 'system',
-            pomodoroDuration: 25,
-            notifications: true
+    try {
+      if (role === 'STUDENT') {
+        const determinedAgeGroup = age < 13 ? 'CHILD' : 'TEENAGER';
+        await prisma.studentProfile.create({
+          data: {
+            userId: user.id,
+            ageGroup: ageGroup || determinedAgeGroup,
+            displayName: email.split('@')[0],
+            preferences: {
+              theme: 'system',
+              pomodoroDuration: 25,
+              notifications: true
+            }
           }
-        }
-      });
-    } else if (role === 'PARENT') {
-      await prisma.parentProfile.create({
-        data: {
-          userId: user.id,
-          displayName: email.split('@')[0]
-        }
-      });
+        });
+      } else if (role === 'PARENT') {
+        await prisma.parentProfile.create({
+          data: {
+            userId: user.id,
+            displayName: email.split('@')[0]
+          }
+        });
+      }
+    } catch (profileErr) {
+      // Rollback user creation if profile fails
+      await prisma.user.delete({ where: { id: user.id } }).catch(function() {});
+      console.error('Error creating profile:', profileErr);
+      throw new AppError('Error al crear el perfil: ' + profileErr.message, 500);
     }
 
     const token = generateToken(user);
