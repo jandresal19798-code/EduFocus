@@ -415,16 +415,6 @@
             list.innerHTML += '<p style="text-align:center;color:var(--text-muted-light);font-size:13px;margin-top:12px">+ ' + (mainTasks.length - 10) + ' tareas más</p>';
         }
     }
-                var taskId = this.dataset.taskId;
-                var isInPlan = todayPlan.find(function(p) { return p.id === taskId; });
-                if (isInPlan) {
-                    removeFromPlan(taskId);
-                } else {
-                    addToPlan(taskId);
-                }
-            };
-        });
-    }
 
     function renderTodayPlan() {
         var container = document.getElementById('todayPlanList');
